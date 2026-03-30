@@ -6,6 +6,8 @@ Timer, countdown, and stopwatch hooks and components for [Ink](https://github.co
 [![CI](https://img.shields.io/github/actions/workflow/status/costajohnt/ink-timer/ci.yml?branch=master&label=CI)](https://github.com/costajohnt/ink-timer/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/ink-timer.svg)](https://github.com/costajohnt/ink-timer/blob/master/LICENSE)
 
+<img src="media/demo.gif" width="600">
+
 ## Features
 
 - **Timer** counts up from zero with start/stop/reset controls
