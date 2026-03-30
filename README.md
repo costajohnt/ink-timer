@@ -1,12 +1,14 @@
 # ink-timer
 
-Timer, countdown, and stopwatch hooks and components for [Ink](https://github.com/vadimdemedes/ink).
-
 [![npm version](https://img.shields.io/npm/v/ink-timer.svg)](https://www.npmjs.com/package/ink-timer)
 [![CI](https://img.shields.io/github/actions/workflow/status/costajohnt/ink-timer/ci.yml?branch=master&label=CI)](https://github.com/costajohnt/ink-timer/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/ink-timer.svg)](https://github.com/costajohnt/ink-timer/blob/master/LICENSE)
 
-<img src="media/demo.gif" width="600">
+<p align="center">
+  <img src="media/demo.gif" alt="ink-timer demo" width="600">
+</p>
+
+Timer, countdown, and stopwatch hooks and components for [Ink](https://github.com/vadimdemedes/ink).
 
 ## Features
 
@@ -443,7 +445,7 @@ Contributions welcome! Please open an issue first to discuss what you'd like to 
 
 ## Changelog
 
-See [GitHub releases](https://github.com/costajohnt/ink-timer/releases).
+See [GitHub Releases](https://github.com/costajohnt/ink-timer/releases).
 
 ## License
 
