@@ -41,7 +41,7 @@ export function Countdown({
     { isActive: enableKeyboard },
   );
 
-  const dimColor = dimWhenPaused && !isRunning;
+  const dimColor = dimWhenPaused && !isRunning && !isComplete;
 
   return (
     <Box>
