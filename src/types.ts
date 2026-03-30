@@ -73,6 +73,8 @@ export interface UseTimerResult {
   stop: () => void;
   /** Reset to 0 and stop. */
   reset: () => void;
+  /** Toggle between running and stopped. */
+  toggle: () => void;
 }
 
 // --- useCountdown ---
@@ -122,6 +124,10 @@ export interface UseCountdownResult {
   stop: () => void;
   /** Reset to the original duration and stop. */
   reset: () => void;
+  /** Toggle between running and stopped. */
+  toggle: () => void;
+  /** Reset and immediately start. Convenience for reset() + start(). */
+  restart: () => void;
 }
 
 // --- useStopwatch ---
@@ -178,6 +184,8 @@ export interface UseStopwatchResult {
   stop: () => void;
   /** Reset to 0, clear all laps, and stop. */
   reset: () => void;
+  /** Toggle between running and stopped. */
+  toggle: () => void;
   /** Record a lap. Only works while running. */
   lap: () => void;
 }

@@ -15,172 +15,199 @@ describe('Stopwatch component', () => {
     vi.useRealTimers();
   });
 
-  it('renders the initial time', () => {
-    const instance = render(React.createElement(Stopwatch, {}));
-    expect(instance.lastFrame()).toContain('00:00');
-    instance.unmount();
+  it('renders the initial time', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(React.createElement(Stopwatch, {}));
+    });
+    expect(instance!.lastFrame()).toContain('00:00');
+    instance!.unmount();
   });
 
   it('updates elapsed time', async () => {
-    const instance = render(React.createElement(Stopwatch, {}));
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(React.createElement(Stopwatch, {}));
+    });
 
     await advanceTimers(5000);
-    expect(instance.lastFrame()).toContain('00:05');
+    expect(instance!.lastFrame()).toContain('00:05');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
-  it('renders prefix and suffix', () => {
-    const instance = render(
-      React.createElement(Stopwatch, {
-        prefix: 'Time: ',
-        suffix: ' running',
-      }),
-    );
+  it('renders prefix and suffix', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, {
+          prefix: 'Time: ',
+          suffix: ' running',
+        }),
+      );
+    });
 
-    expect(instance.lastFrame()).toContain('Time: ');
-    expect(instance.lastFrame()).toContain(' running');
+    expect(instance!.lastFrame()).toContain('Time: ');
+    expect(instance!.lastFrame()).toContain(' running');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('shows laps when L key is pressed with keyboard enabled', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, { enableKeyboard: true }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, { enableKeyboard: true }),
+      );
+    });
 
     await advanceTimers(3000);
 
     // Press L to record a lap
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
-    const frame = instance.lastFrame();
+    const frame = instance!.lastFrame();
     expect(frame).toContain('Lap 1');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('responds to space for pause/resume', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, { enableKeyboard: true }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, { enableKeyboard: true }),
+      );
+    });
 
     await advanceTimers(2000);
-    expect(instance.lastFrame()).toContain('00:02');
+    expect(instance!.lastFrame()).toContain('00:02');
 
     // Pause
     await act(() => {
-      instance.stdin.write(' ');
+      instance!.stdin.write(' ');
     });
     await advanceTimers(100);
 
     await advanceTimers(5000);
-    expect(instance.lastFrame()).toContain('00:02');
+    expect(instance!.lastFrame()).toContain('00:02');
 
     // Resume
     await act(() => {
-      instance.stdin.write(' ');
+      instance!.stdin.write(' ');
     });
     await advanceTimers(100);
 
     await advanceTimers(1000);
-    expect(instance.lastFrame()).toContain('00:03');
+    expect(instance!.lastFrame()).toContain('00:03');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('resets on R key press', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, { enableKeyboard: true }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, { enableKeyboard: true }),
+      );
+    });
 
     await advanceTimers(5000);
-    expect(instance.lastFrame()).toContain('00:05');
+    expect(instance!.lastFrame()).toContain('00:05');
 
     await act(() => {
-      instance.stdin.write('r');
+      instance!.stdin.write('r');
     });
     await advanceTimers(100);
 
-    expect(instance.lastFrame()).toContain('00:00');
+    expect(instance!.lastFrame()).toContain('00:00');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('hides laps when showLaps is false', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, {
-        enableKeyboard: true,
-        showLaps: false,
-      }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, {
+          enableKeyboard: true,
+          showLaps: false,
+        }),
+      );
+    });
 
     await advanceTimers(3000);
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
-    expect(instance.lastFrame()).not.toContain('Lap');
+    expect(instance!.lastFrame()).not.toContain('Lap');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('limits displayed laps with maxLapsDisplay', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, {
-        enableKeyboard: true,
-        maxLapsDisplay: 2,
-      }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, {
+          enableKeyboard: true,
+          maxLapsDisplay: 2,
+        }),
+      );
+    });
 
     // Record 3 laps
     await advanceTimers(1000);
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
     await advanceTimers(1000);
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
     await advanceTimers(1000);
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
-    const frame = instance.lastFrame()!;
+    const frame = instance!.lastFrame()!;
     // Should show only the 2 most recent laps
     expect(frame).not.toContain('Lap 1');
     expect(frame).toContain('Lap 2');
     expect(frame).toContain('Lap 3');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('does not record lap when L key is disabled', async () => {
-    const instance = render(
-      React.createElement(Stopwatch, {
-        enableKeyboard: true,
-        enableLapKey: false,
-      }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(Stopwatch, {
+          enableKeyboard: true,
+          enableLapKey: false,
+        }),
+      );
+    });
 
     await advanceTimers(3000);
     await act(() => {
-      instance.stdin.write('l');
+      instance!.stdin.write('l');
     });
     await advanceTimers(100);
 
-    expect(instance.lastFrame()).not.toContain('Lap');
+    expect(instance!.lastFrame()).not.toContain('Lap');
 
-    instance.unmount();
+    instance!.unmount();
   });
 });

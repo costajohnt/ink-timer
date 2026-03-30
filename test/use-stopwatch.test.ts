@@ -8,7 +8,7 @@ import type { UseStopwatchOptions } from '../src/types.js';
 import { advanceTimers } from './helpers.js';
 
 function StopwatchHarness(
-  props: UseStopwatchOptions & { action?: 'start' | 'stop' | 'reset' | 'lap' },
+  props: UseStopwatchOptions & { action?: 'start' | 'stop' | 'reset' | 'lap' | 'toggle' },
 ) {
   const { action, ...options } = props;
   const sw = useStopwatch(options);
@@ -18,6 +18,7 @@ function StopwatchHarness(
     if (action === 'stop') sw.stop();
     if (action === 'reset') sw.reset();
     if (action === 'lap') sw.lap();
+    if (action === 'toggle') sw.toggle();
   }, [action]);
 
   // Use short keys to keep JSON output under Ink's 100-char line width
@@ -71,29 +72,35 @@ describe('useStopwatch', () => {
   });
 
   it('starts automatically and tracks elapsed time', async () => {
-    const instance = render(
-      React.createElement(StopwatchHarness, { interval: 1000 }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000 }),
+      );
+    });
 
     await advanceTimers(3000);
-    const state = parseFrame(instance.lastFrame());
+    const state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(3000);
     expect(state.isRunning).toBe(true);
     expect(state.text).toBe('00:03');
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('records laps', async () => {
     const onLap = vi.fn();
-    const instance = render(
-      React.createElement(StopwatchHarness, { interval: 1000, onLap }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000, onLap }),
+      );
+    });
 
     // Run for 3 seconds, then lap
     await advanceTimers(3000);
     await act(() => {
-      instance.rerender(
+      instance!.rerender(
         React.createElement(StopwatchHarness, {
           interval: 1000,
           onLap,
@@ -103,28 +110,31 @@ describe('useStopwatch', () => {
     });
     await advanceTimers(100);
 
-    let state = parseFrame(instance.lastFrame());
+    const state = parseFrame(instance!.lastFrame());
     expect(state.laps).toHaveLength(1);
     expect(state.laps[0]!.n).toBe(1);
     expect(state.laps[0]!.d).toBeGreaterThan(0);
     expect(state.laps[0]!.c).toBeGreaterThan(0);
     expect(onLap).toHaveBeenCalledTimes(1);
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('pauses and resumes', async () => {
-    const instance = render(
-      React.createElement(StopwatchHarness, { interval: 1000 }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000 }),
+      );
+    });
 
     await advanceTimers(2000);
-    let state = parseFrame(instance.lastFrame());
+    let state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(2000);
 
     // Pause
     await act(() => {
-      instance.rerender(
+      instance!.rerender(
         React.createElement(StopwatchHarness, {
           interval: 1000,
           action: 'stop',
@@ -134,13 +144,13 @@ describe('useStopwatch', () => {
     await advanceTimers(100);
 
     await advanceTimers(5000);
-    state = parseFrame(instance.lastFrame());
+    state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(2000);
     expect(state.isRunning).toBe(false);
 
     // Resume
     await act(() => {
-      instance.rerender(
+      instance!.rerender(
         React.createElement(StopwatchHarness, {
           interval: 1000,
           action: 'start',
@@ -150,23 +160,26 @@ describe('useStopwatch', () => {
     await advanceTimers(100);
 
     await advanceTimers(3000);
-    state = parseFrame(instance.lastFrame());
+    state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(5000);
     expect(state.isRunning).toBe(true);
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('resets elapsed and clears laps', async () => {
-    const instance = render(
-      React.createElement(StopwatchHarness, { interval: 1000 }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000 }),
+      );
+    });
 
     await advanceTimers(3000);
 
     // Record a lap
     await act(() => {
-      instance.rerender(
+      instance!.rerender(
         React.createElement(StopwatchHarness, {
           interval: 1000,
           action: 'lap',
@@ -175,12 +188,12 @@ describe('useStopwatch', () => {
     });
     await advanceTimers(100);
 
-    let state = parseFrame(instance.lastFrame());
+    let state = parseFrame(instance!.lastFrame());
     expect(state.laps).toHaveLength(1);
 
     // Reset
     await act(() => {
-      instance.rerender(
+      instance!.rerender(
         React.createElement(StopwatchHarness, {
           interval: 1000,
           action: 'reset',
@@ -189,40 +202,75 @@ describe('useStopwatch', () => {
     });
     await advanceTimers(100);
 
-    state = parseFrame(instance.lastFrame());
+    state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(0);
     expect(state.isRunning).toBe(false);
     expect(state.laps).toHaveLength(0);
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('does not start when autoStart is false', async () => {
-    const instance = render(
-      React.createElement(StopwatchHarness, {
-        interval: 1000,
-        autoStart: false,
-      }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, {
+          interval: 1000,
+          autoStart: false,
+        }),
+      );
+    });
 
     await advanceTimers(5000);
-    const state = parseFrame(instance.lastFrame());
+    const state = parseFrame(instance!.lastFrame());
     expect(state.elapsedMs).toBe(0);
     expect(state.isRunning).toBe(false);
 
-    instance.unmount();
+    instance!.unmount();
   });
 
   it('calls onTick with elapsed ms', async () => {
     const onTick = vi.fn();
-    const instance = render(
-      React.createElement(StopwatchHarness, { interval: 1000, onTick }),
-    );
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+      );
+    });
 
     await advanceTimers(2000);
     expect(onTick).toHaveBeenCalledTimes(2);
     expect(onTick).toHaveBeenLastCalledWith(2000);
 
-    instance.unmount();
+    instance!.unmount();
+  });
+
+  it('toggle switches between running and stopped', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000 }),
+      );
+    });
+
+    await advanceTimers(2000);
+    let state = parseFrame(instance!.lastFrame());
+    expect(state.isRunning).toBe(true);
+
+    // Toggle off
+    await act(() => {
+      instance!.rerender(
+        React.createElement(StopwatchHarness, {
+          interval: 1000,
+          action: 'toggle',
+        }),
+      );
+    });
+    await advanceTimers(100);
+
+    state = parseFrame(instance!.lastFrame());
+    expect(state.isRunning).toBe(false);
+
+    instance!.unmount();
   });
 });

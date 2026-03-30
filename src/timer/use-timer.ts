@@ -59,6 +59,14 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
     setIsRunning(false);
   }, []);
 
+  const toggle = useCallback(() => {
+    if (isRunningRef.current) {
+      stop();
+    } else {
+      start();
+    }
+  }, [start, stop]);
+
   const formatted = formatTime(elapsedMs, format);
 
   return {
@@ -68,5 +76,6 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
     start,
     stop,
     reset,
+    toggle,
   };
 }

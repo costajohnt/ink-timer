@@ -75,8 +75,14 @@ function resolveFormatter(format: FormatOption | undefined): FormatFunction {
   return presets[format ?? 'digital'];
 }
 
+let warnedFormatOnce = false;
+
 /**
  * Build a complete FormattedTime object from a raw millisecond value.
+ *
+ * If a user-provided custom format function throws, the error is caught,
+ * a dev-mode warning is emitted (once), and the 'digital' preset is used
+ * as a fallback.
  */
 export function formatTime(
   totalMs: number,
@@ -85,14 +91,37 @@ export function formatTime(
   const { hours, minutes, seconds, milliseconds } = decompose(totalMs);
   const formatter = resolveFormatter(format);
 
+  let text: string;
+  try {
+    text = formatter(totalMs);
+  } catch (err) {
+    if (process.env['NODE_ENV'] !== 'production' && !warnedFormatOnce) {
+      warnedFormatOnce = true;
+      console.warn(
+        '[ink-timer] Custom format function threw an error. ' +
+        'Falling back to "digital" preset.',
+        err,
+      );
+    }
+    text = presets.digital(totalMs);
+  }
+
   return {
-    text: formatter(totalMs),
+    text,
     hours,
     minutes,
     seconds,
     milliseconds,
     totalMs: Math.max(0, totalMs),
   };
+}
+
+/**
+ * Reset the one-time format warning flag. Exposed for testing only.
+ * @internal
+ */
+export function _resetFormatWarning(): void {
+  warnedFormatOnce = false;
 }
 
 /**

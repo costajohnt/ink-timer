@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { formatTime, resolveComponentFormat } from '../src/format.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { formatTime, resolveComponentFormat, _resetFormatWarning } from '../src/format.js';
 
 describe('formatTime', () => {
   describe('digital preset (default)', () => {
@@ -128,6 +128,34 @@ describe('formatTime', () => {
       expect(result.seconds).toBe(0);
       expect(result.milliseconds).toBe(0);
     });
+  });
+});
+
+describe('custom format error handling', () => {
+  beforeEach(() => {
+    _resetFormatWarning();
+  });
+
+  it('falls back to digital when custom format throws', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const broken = () => { throw new Error('boom'); };
+    const result = formatTime(5000, broken);
+    expect(result.text).toBe('00:05');
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Custom format function threw an error'),
+      expect.any(Error),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('warns only once for repeated errors', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const broken = () => { throw new Error('boom'); };
+    formatTime(1000, broken);
+    formatTime(2000, broken);
+    formatTime(3000, broken);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    warnSpy.mockRestore();
   });
 });
 

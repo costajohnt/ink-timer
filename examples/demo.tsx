@@ -1,10 +1,12 @@
 /**
  * Example usage of ink-timer components.
  *
- * Requires the package to be built and linked first:
- *   npm run build && npm link && npm link ink-timer
+ * Before running, build and link the package:
+ *   cd /path/to/ink-timer && npm run build && npm link
+ *   cd /path/to/this-example && npm link ink-timer
  *
- * Then run with: npx tsx example.tsx
+ * Then run with:
+ *   npx tsx examples/demo.tsx
  */
 import React from 'react';
 import { render, Box, Text } from 'ink';

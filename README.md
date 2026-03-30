@@ -2,7 +2,9 @@
 
 Timer, countdown, and stopwatch hooks and components for [Ink](https://github.com/vadimdemedes/ink).
 
-<!-- badges -->
+[![npm version](https://img.shields.io/npm/v/ink-timer.svg)](https://www.npmjs.com/package/ink-timer)
+[![CI](https://img.shields.io/github/actions/workflow/status/costajohnt/ink-timer/ci.yml?branch=master&label=CI)](https://github.com/costajohnt/ink-timer/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/ink-timer.svg)](https://github.com/costajohnt/ink-timer/blob/master/LICENSE)
 
 ## Features
 
@@ -92,6 +94,7 @@ A hook that counts elapsed time upward.
 | `start` | `() => void` | Start or resume the timer. No-op if already running |
 | `stop` | `() => void` | Pause the timer. No-op if not running |
 | `reset` | `() => void` | Reset to 0 and stop |
+| `toggle` | `() => void` | Toggle between running and stopped |
 
 ---
 
@@ -121,6 +124,8 @@ A hook that counts down from a given duration.
 | `start` | `() => void` | Start or resume. No-op if already running or complete |
 | `stop` | `() => void` | Pause. No-op if not running |
 | `reset` | `() => void` | Reset to the original duration and stop |
+| `toggle` | `() => void` | Toggle between running and stopped |
+| `restart` | `() => void` | Reset and immediately start |
 
 ---
 
@@ -149,6 +154,7 @@ A hook that counts elapsed time upward with lap recording.
 | `start` | `() => void` | Start or resume. No-op if already running |
 | `stop` | `() => void` | Pause. No-op if not running |
 | `reset` | `() => void` | Reset to 0, clear all laps, and stop |
+| `toggle` | `() => void` | Toggle between running and stopped |
 | `lap` | `() => void` | Record a lap. Only works while running |
 
 #### `Lap`
@@ -159,6 +165,8 @@ A hook that counts elapsed time upward with lap recording.
 | `durationMs` | `number` | Duration of this individual lap in milliseconds |
 | `cumulativeMs` | `number` | Cumulative elapsed time at the moment this lap was recorded |
 | `formatted` | `FormattedTime` | Formatted breakdown of this lap's duration |
+
+> **Note:** Each lap's `formatted` field is a snapshot created at recording time using the format option that was active when the lap was recorded. If you change the format option after recording laps, previously recorded laps retain their original formatting.
 
 ---
 
@@ -426,6 +434,14 @@ import type {
   TimerDisplayProps,
 } from 'ink-timer';
 ```
+
+## Contributing
+
+Contributions welcome! Please open an issue first to discuss what you'd like to change.
+
+## Changelog
+
+See [GitHub releases](https://github.com/costajohnt/ink-timer/releases).
 
 ## License
 

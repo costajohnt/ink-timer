@@ -70,6 +70,14 @@ export function useStopwatch(
     setLaps([]);
   }, []);
 
+  const toggle = useCallback(() => {
+    if (isRunningRef.current) {
+      stop();
+    } else {
+      start();
+    }
+  }, [start, stop]);
+
   const lap = useCallback(() => {
     if (startedAtRef.current === null) return;
 
@@ -101,6 +109,7 @@ export function useStopwatch(
     start,
     stop,
     reset,
+    toggle,
     lap,
   };
 }
