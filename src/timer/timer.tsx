@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useIsScreenReaderEnabled } from 'ink';
 import { useTimer } from './use-timer.js';
-import { resolveComponentFormat } from '../format.js';
+import { resolveComponentFormat, buildAriaTimeDescription } from '../format.js';
 import type { TimerProps } from '../types.js';
 
 export function Timer({
@@ -36,18 +36,25 @@ export function Timer({
     { isActive: enableKeyboard },
   );
 
+  const screenReader = useIsScreenReaderEnabled();
+  const timeDescription = buildAriaTimeDescription(formatted.totalMs);
+  const stateLabel = isRunning ? '' : ', paused';
+  const ariaLabel = `Timer: ${timeDescription} elapsed${stateLabel}`;
   const dimColor = dimWhenPaused && !isRunning;
 
   return (
-    <Box>
+    <Box aria-role="timer" aria-label={ariaLabel}>
       {prefix !== undefined && (
-        <Text dimColor={dimColor}>{prefix}</Text>
+        <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
       )}
       <Text color={color} bold={bold} dimColor={dimColor}>
         {formatted.text}
       </Text>
       {suffix !== undefined && (
-        <Text dimColor={dimColor}>{suffix}</Text>
+        <Text dimColor={dimColor} aria-hidden>{suffix}</Text>
+      )}
+      {screenReader && (
+        <Text> ({isRunning ? 'running' : 'paused'})</Text>
       )}
     </Box>
   );
