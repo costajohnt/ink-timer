@@ -1,6 +1,6 @@
 {
   "name": "ink-timer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Timer, countdown, and stopwatch hooks and components for Ink",
   "author": "John Costa",
   "license": "MIT",
