@@ -57,11 +57,11 @@ export function Stopwatch({
 
   return (
     <Box flexDirection="column">
-      <Box aria-role="timer" aria-label={ariaLabel}>
+      <Box aria-role="timer">
         {prefix !== undefined && (
           <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
         )}
-        <Text color={color} bold={bold} dimColor={dimColor}>
+        <Text color={color} bold={bold} dimColor={dimColor} aria-label={ariaLabel}>
           {formatted.text}
         </Text>
         {suffix !== undefined && (
@@ -73,16 +73,16 @@ export function Stopwatch({
       </Box>
 
       {displayLaps.length > 0 && (
-        <Box flexDirection="column" marginTop={1} aria-role="list" aria-label="Lap times">
+        <Box flexDirection="column" marginTop={1} aria-role="list">
+          <Text aria-label="Lap times">{''}</Text>
           {displayLaps.map((l) => (
             <Box
               key={l.number}
               gap={1}
               aria-role="listitem"
-              aria-label={`Lap ${l.number}: ${buildAriaTimeDescription(l.durationMs)}`}
             >
               <Text dimColor>Lap {l.number}</Text>
-              <Text>{l.formatted.text}</Text>
+              <Text aria-label={`Lap ${l.number}: ${buildAriaTimeDescription(l.durationMs)}`}>{l.formatted.text}</Text>
             </Box>
           ))}
         </Box>

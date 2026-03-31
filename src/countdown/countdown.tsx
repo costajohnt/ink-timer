@@ -54,11 +54,11 @@ export function Countdown({
   const dimColor = dimWhenPaused && !isRunning && !isComplete;
 
   return (
-    <Box aria-role="timer" aria-label={ariaLabel}>
+    <Box aria-role="timer">
       {prefix !== undefined && (
         <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
       )}
-      <Text color={color} bold={bold} dimColor={dimColor}>
+      <Text color={color} bold={bold} dimColor={dimColor} aria-label={ariaLabel}>
         {formatted.text}
       </Text>
       {suffix !== undefined && (
