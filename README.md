@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/ink-timer.svg)](https://www.npmjs.com/package/ink-timer)
 [![CI](https://img.shields.io/github/actions/workflow/status/costajohnt/ink-timer/ci.yml?branch=master&label=CI)](https://github.com/costajohnt/ink-timer/actions/workflows/ci.yml)
-[![license](https://img.shields.io/npm/l/ink-timer.svg)](https://github.com/costajohnt/ink-timer/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/l/ink-timer.svg)](https://github.com/costajohnt/ink-timer/blob/master/LICENSE) [![npm downloads](https://img.shields.io/npm/dw/ink-timer.svg)](https://www.npmjs.com/package/ink-timer)
 
 <p align="center">
   <img src="media/demo.gif" alt="ink-timer demo" width="600">
