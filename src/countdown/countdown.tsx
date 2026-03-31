@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useIsScreenReaderEnabled } from 'ink';
 import { useCountdown } from './use-countdown.js';
-import { resolveComponentFormat } from '../format.js';
+import { resolveComponentFormat, buildAriaTimeDescription } from '../format.js';
 import type { CountdownProps } from '../types.js';
 
 export function Countdown({
@@ -41,18 +41,33 @@ export function Countdown({
     { isActive: enableKeyboard },
   );
 
+  const screenReader = useIsScreenReaderEnabled();
+  const timeDescription = buildAriaTimeDescription(formatted.totalMs);
+  let ariaLabel: string;
+  if (isComplete) {
+    ariaLabel = 'Countdown complete';
+  } else {
+    const stateLabel = isRunning ? '' : ', paused';
+    ariaLabel = `Countdown: ${timeDescription} remaining${stateLabel}`;
+  }
+
   const dimColor = dimWhenPaused && !isRunning && !isComplete;
 
   return (
-    <Box>
+    <Box aria-role="timer" aria-label={ariaLabel}>
       {prefix !== undefined && (
-        <Text dimColor={dimColor}>{prefix}</Text>
+        <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
       )}
       <Text color={color} bold={bold} dimColor={dimColor}>
         {formatted.text}
       </Text>
       {suffix !== undefined && (
-        <Text dimColor={dimColor}>{suffix}</Text>
+        <Text dimColor={dimColor} aria-hidden>{suffix}</Text>
+      )}
+      {screenReader && (
+        <Text>
+          {isComplete ? ' (complete)' : isRunning ? ' (running)' : ' (paused)'}
+        </Text>
       )}
     </Box>
   );

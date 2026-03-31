@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useIsScreenReaderEnabled } from 'ink';
 import { useStopwatch } from './use-stopwatch.js';
-import { resolveComponentFormat } from '../format.js';
+import { resolveComponentFormat, buildAriaTimeDescription } from '../format.js';
 import type { StopwatchProps } from '../types.js';
 
 export function Stopwatch({
@@ -43,6 +43,10 @@ export function Stopwatch({
     { isActive: enableKeyboard },
   );
 
+  const screenReader = useIsScreenReaderEnabled();
+  const timeDescription = buildAriaTimeDescription(formatted.totalMs);
+  const stateLabel = isRunning ? '' : ', paused';
+  const ariaLabel = `Stopwatch: ${timeDescription} elapsed${stateLabel}`;
   const dimColor = dimWhenPaused && !isRunning;
 
   const displayLaps = showLaps
@@ -53,22 +57,30 @@ export function Stopwatch({
 
   return (
     <Box flexDirection="column">
-      <Box>
+      <Box aria-role="timer" aria-label={ariaLabel}>
         {prefix !== undefined && (
-          <Text dimColor={dimColor}>{prefix}</Text>
+          <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
         )}
         <Text color={color} bold={bold} dimColor={dimColor}>
           {formatted.text}
         </Text>
         {suffix !== undefined && (
-          <Text dimColor={dimColor}>{suffix}</Text>
+          <Text dimColor={dimColor} aria-hidden>{suffix}</Text>
+        )}
+        {screenReader && (
+          <Text> ({isRunning ? 'running' : 'paused'})</Text>
         )}
       </Box>
 
       {displayLaps.length > 0 && (
-        <Box flexDirection="column" marginTop={1}>
+        <Box flexDirection="column" marginTop={1} aria-role="list" aria-label="Lap times">
           {displayLaps.map((l) => (
-            <Box key={l.number} gap={1}>
+            <Box
+              key={l.number}
+              gap={1}
+              aria-role="listitem"
+              aria-label={`Lap ${l.number}: ${buildAriaTimeDescription(l.durationMs)}`}
+            >
               <Text dimColor>Lap {l.number}</Text>
               <Text>{l.formatted.text}</Text>
             </Box>

@@ -8,6 +8,9 @@ export { Timer } from './timer/index.js';
 export { Countdown } from './countdown/index.js';
 export { Stopwatch } from './stopwatch/index.js';
 
+// Accessibility utilities
+export { buildAriaTimeDescription } from './format.js';
+
 // Types (re-export all public types for consumers)
 export type {
   // Format

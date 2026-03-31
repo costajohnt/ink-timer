@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { formatTime, resolveComponentFormat, _resetFormatWarning } from '../src/format.js';
+import { formatTime, resolveComponentFormat, buildAriaTimeDescription, _resetFormatWarning } from '../src/format.js';
 
 describe('formatTime', () => {
   describe('digital preset (default)', () => {
@@ -156,6 +156,40 @@ describe('custom format error handling', () => {
     formatTime(3000, broken);
     expect(warnSpy).toHaveBeenCalledTimes(1);
     warnSpy.mockRestore();
+  });
+});
+
+describe('buildAriaTimeDescription', () => {
+  it('returns "0 seconds" for 0ms', () => {
+    expect(buildAriaTimeDescription(0)).toBe('0 seconds');
+  });
+
+  it('uses singular "second" for 1 second', () => {
+    expect(buildAriaTimeDescription(1000)).toBe('1 second');
+  });
+
+  it('uses plural "seconds" for multiple seconds', () => {
+    expect(buildAriaTimeDescription(5000)).toBe('5 seconds');
+  });
+
+  it('includes minutes and seconds', () => {
+    expect(buildAriaTimeDescription(150_000)).toBe('2 minutes 30 seconds');
+  });
+
+  it('uses singular "minute" for 1 minute', () => {
+    expect(buildAriaTimeDescription(60_000)).toBe('1 minute 0 seconds');
+  });
+
+  it('includes hours, minutes, and seconds', () => {
+    expect(buildAriaTimeDescription(3_661_000)).toBe('1 hour 1 minute 1 second');
+  });
+
+  it('uses plural "hours" for multiple hours', () => {
+    expect(buildAriaTimeDescription(7_200_000)).toBe('2 hours 0 seconds');
+  });
+
+  it('clamps negative values', () => {
+    expect(buildAriaTimeDescription(-1000)).toBe('0 seconds');
   });
 });
 

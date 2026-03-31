@@ -117,6 +117,19 @@ export function formatTime(
 }
 
 /**
+ * Build a human-readable time description for screen readers.
+ * E.g. 150000ms → "2 minutes 30 seconds"
+ */
+export function buildAriaTimeDescription(totalMs: number): string {
+  const { hours, minutes, seconds } = decompose(totalMs);
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
+  if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`);
+  parts.push(`${seconds} ${seconds === 1 ? 'second' : 'seconds'}`);
+  return parts.join(' ');
+}
+
+/**
  * Reset the one-time format warning flag. Exposed for testing only.
  * @internal
  */
