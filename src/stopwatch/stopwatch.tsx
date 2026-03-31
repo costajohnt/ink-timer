@@ -81,7 +81,7 @@ export function Stopwatch({
               gap={1}
               aria-role="listitem"
             >
-              <Text dimColor>Lap {l.number}</Text>
+              <Text dimColor aria-hidden>Lap {l.number}</Text>
               <Text aria-label={`Lap ${l.number}: ${buildAriaTimeDescription(l.durationMs)}`}>{l.formatted.text}</Text>
             </Box>
           ))}
