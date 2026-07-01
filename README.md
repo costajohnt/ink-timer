@@ -17,7 +17,7 @@ Timer, countdown, and stopwatch hooks and components for [Ink](https://github.co
 - **Stopwatch** counts up with lap recording and lap history
 - Four built-in format presets plus custom format functions
 - Keyboard controls out of the box (pause, resume, reset, lap)
-- Designed for React 18+ and Ink 5+
+- Designed for React 19+ and Ink 6+
 - Full TypeScript types exported
 
 ## Install
@@ -26,7 +26,7 @@ Timer, countdown, and stopwatch hooks and components for [Ink](https://github.co
 npm install ink-timer
 ```
 
-Peer dependencies: `react` (>=18) and `ink` (>=5).
+Peer dependencies: `react` (>=19) and `ink` (>=6). The components (`<Timer>`, `<Countdown>`, `<Stopwatch>`) render with Ink, so they require Ink 6+ (which in turn requires React 19+). The hooks (`useTimer`, `useCountdown`, `useStopwatch`) and their `formatTime` output are ink-free, so you can use them with any React 19+ renderer.
 
 ## Quick Start
 
