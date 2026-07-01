@@ -75,18 +75,27 @@ function resolveFormatter(format: FormatOption | undefined): FormatFunction {
   return presets[format ?? 'digital'];
 }
 
-let warnedFormatOnce = false;
+/**
+ * Mutable one-shot warning context. Callers (e.g. each hook instance) own
+ * their own object so a warning fires once per caller instead of once per
+ * process. See `formatTime`.
+ */
+export interface WarnOnce {
+  warned: boolean;
+}
 
 /**
  * Build a complete FormattedTime object from a raw millisecond value.
  *
  * If a user-provided custom format function throws, the error is caught,
- * a dev-mode warning is emitted (once), and the 'digital' preset is used
- * as a fallback.
+ * a dev-mode warning is emitted, and the 'digital' preset is used as a
+ * fallback. Pass a `warnOnce` context to deduplicate the warning across
+ * repeated calls from the same caller; without one, every failing call warns.
  */
 export function formatTime(
   totalMs: number,
   format: FormatOption | undefined,
+  warnOnce?: WarnOnce,
 ): FormattedTime {
   const { hours, minutes, seconds, milliseconds } = decompose(totalMs);
   const formatter = resolveFormatter(format);
@@ -95,8 +104,8 @@ export function formatTime(
   try {
     text = formatter(totalMs);
   } catch (err) {
-    if (process.env['NODE_ENV'] !== 'production' && !warnedFormatOnce) {
-      warnedFormatOnce = true;
+    if (process.env['NODE_ENV'] !== 'production' && !warnOnce?.warned) {
+      if (warnOnce) warnOnce.warned = true;
       console.warn(
         '[ink-timer] Custom format function threw an error. ' +
         'Falling back to "digital" preset.',
@@ -127,14 +136,6 @@ export function buildAriaTimeDescription(totalMs: number): string {
   if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`);
   parts.push(`${seconds} ${seconds === 1 ? 'second' : 'seconds'}`);
   return parts.join(' ');
-}
-
-/**
- * Reset the one-time format warning flag. Exposed for testing only.
- * @internal
- */
-export function _resetFormatWarning(): void {
-  warnedFormatOnce = false;
 }
 
 /**
