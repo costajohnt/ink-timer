@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useInterval } from '../use-interval.js';
-import { formatTime } from '../format.js';
+import { useInterval, useClampedInterval } from '../use-interval.js';
+import { formatTime, type WarnOnce } from '../format.js';
 import type {
   Lap,
   UseStopwatchOptions,
@@ -18,6 +18,8 @@ export function useStopwatch(
     format,
   } = options;
 
+  const safeInterval = useClampedInterval(interval);
+
   const [isRunning, setIsRunning] = useState(autoStart);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [laps, setLaps] = useState<Lap[]>([]);
@@ -29,6 +31,7 @@ export function useStopwatch(
   const lapCountRef = useRef(0);
   const onTickRef = useRef(onTick);
   const onLapRef = useRef(onLap);
+  const formatWarnRef = useRef<WarnOnce>({ warned: false });
 
   useEffect(() => { onTickRef.current = onTick; });
   useEffect(() => { onLapRef.current = onLap; });
@@ -40,7 +43,17 @@ export function useStopwatch(
     onTickRef.current?.(total);
   }, []);
 
-  useInterval(tick, isRunning ? interval : null);
+  // Schedule each tick to the next interval boundary so displayed values stay
+  // aligned to the elapsed-time anchor (no drift, no skipped/repeated seconds).
+  const nextDelay = useCallback((): number | null => {
+    if (startedAtRef.current === null) return null;
+    const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
+    const nextBoundary =
+      Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
+    return nextBoundary - elapsed;
+  }, [safeInterval]);
+
+  useInterval(tick, isRunning ? nextDelay : null);
 
   const start = useCallback(() => {
     if (isRunningRef.current) return;
@@ -92,14 +105,14 @@ export function useStopwatch(
       number: lapCountRef.current,
       durationMs,
       cumulativeMs,
-      formatted: formatTime(durationMs, format),
+      formatted: formatTime(durationMs, format, formatWarnRef.current),
     };
 
     onLapRef.current?.(newLap);
     setLaps((prev) => [...prev, newLap]);
   }, [format]);
 
-  const formatted = formatTime(elapsedMs, format);
+  const formatted = formatTime(elapsedMs, format, formatWarnRef.current);
 
   return {
     elapsedMs,

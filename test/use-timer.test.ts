@@ -222,6 +222,49 @@ describe('useTimer', () => {
     instance!.unmount();
   });
 
+  it('keeps ticks aligned to interval boundaries', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(TimerHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    // Ticks land on exact elapsed boundaries: 1000, 2000, 3000 — no drift,
+    // no repeated or skipped values.
+    await advanceTimers(3000);
+    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000]);
+
+    instance!.unmount();
+  });
+
+  it('adapts tick cadence when interval changes while running', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(TimerHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    await advanceTimers(2000);
+    expect(onTick).toHaveBeenCalledTimes(2);
+
+    // Switch to a 500ms interval; next boundaries are 2500, 3000, ...
+    await act(() => {
+      instance!.rerender(
+        React.createElement(TimerHarness, { interval: 500, onTick }),
+      );
+    });
+
+    await advanceTimers(1000);
+    expect(onTick).toHaveBeenCalledTimes(4);
+    expect(onTick).toHaveBeenLastCalledWith(3000);
+
+    instance!.unmount();
+  });
+
   it('toggles between running and stopped', async () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
