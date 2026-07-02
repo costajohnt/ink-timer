@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { formatTime, resolveComponentFormat, buildAriaTimeDescription, _resetFormatWarning } from '../src/format.js';
+import { describe, it, expect, vi } from 'vitest';
+import { formatTime, resolveComponentFormat, buildAriaTimeDescription } from '../src/format.js';
 
 describe('formatTime', () => {
   describe('digital preset (default)', () => {
@@ -132,10 +132,6 @@ describe('formatTime', () => {
 });
 
 describe('custom format error handling', () => {
-  beforeEach(() => {
-    _resetFormatWarning();
-  });
-
   it('falls back to digital when custom format throws', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const broken = () => { throw new Error('boom'); };
@@ -148,13 +144,27 @@ describe('custom format error handling', () => {
     warnSpy.mockRestore();
   });
 
-  it('warns only once for repeated errors', () => {
+  it('warns only once per warn context for repeated errors', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const broken = () => { throw new Error('boom'); };
-    formatTime(1000, broken);
-    formatTime(2000, broken);
-    formatTime(3000, broken);
+    const warnOnce = { warned: false };
+    formatTime(1000, broken, warnOnce);
+    formatTime(2000, broken, warnOnce);
+    formatTime(3000, broken, warnOnce);
     expect(warnSpy).toHaveBeenCalledTimes(1);
+    warnSpy.mockRestore();
+  });
+
+  it('uses independent warn contexts per caller', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const broken = () => { throw new Error('boom'); };
+    const a = { warned: false };
+    const b = { warned: false };
+    formatTime(1000, broken, a);
+    formatTime(1000, broken, a);
+    formatTime(1000, broken, b);
+    // One warning per distinct context, not shared process-wide.
+    expect(warnSpy).toHaveBeenCalledTimes(2);
     warnSpy.mockRestore();
   });
 });

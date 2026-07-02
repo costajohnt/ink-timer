@@ -1,6 +1,6 @@
 {
   "name": "ink-timer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Timer, countdown, and stopwatch hooks and components for Ink",
   "author": "John Costa",
   "license": "MIT",
@@ -11,6 +11,7 @@
   "homepage": "https://github.com/costajohnt/ink-timer#readme",
   "bugs": "https://github.com/costajohnt/ink-timer/issues",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -30,12 +31,14 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "xo",
+    "lint:fix": "xo --fix",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "ink": ">=5.0.0",
-    "react": ">=18.0.0"
+    "ink": ">=6.0.0",
+    "react": ">=19.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {
@@ -45,12 +48,15 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "@types/react": "^19.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "ink": "^6.8.0",
     "ink-testing-library": "^4.0.0",
     "react": "^19.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "xo": "^2.0.2"
   },
   "keywords": [
     "ink",

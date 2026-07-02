@@ -1,9 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useInterval } from '../use-interval.js';
-import { formatTime } from '../format.js';
+import { useInterval, useClampedInterval } from '../use-interval.js';
+import { formatTime, type WarnOnce } from '../format.js';
 import type { UseCountdownOptions, UseCountdownResult } from '../types.js';
-
-let warnedDurationOnce = false;
 
 export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const {
@@ -15,18 +13,24 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     format,
   } = options;
 
-  // Validate duration at dev time
-  if (duration <= 0) {
-    if (process.env['NODE_ENV'] !== 'production' && !warnedDurationOnce) {
-      warnedDurationOnce = true;
+  const safeInterval = useClampedInterval(interval);
+  const warnedDurationRef = useRef(false);
+  const formatWarnRef = useRef<WarnOnce>({ warned: false });
+
+  // Validate duration at dev time (once per hook instance). A non-finite or
+  // non-positive duration is invalid and completes immediately.
+  const durationInvalid = !Number.isFinite(duration) || duration <= 0;
+  if (durationInvalid) {
+    if (process.env['NODE_ENV'] !== 'production' && !warnedDurationRef.current) {
+      warnedDurationRef.current = true;
       console.warn(
         `[ink-timer] useCountdown received duration=${duration}. ` +
-        'Duration must be > 0. The countdown will be immediately complete.',
+        'Duration must be a finite number > 0. The countdown will be immediately complete.',
       );
     }
   }
 
-  const safeDuration = Math.max(0, duration);
+  const safeDuration = durationInvalid ? 0 : duration;
 
   const [isRunning, setIsRunning] = useState(autoStart && safeDuration > 0);
   const [isComplete, setIsComplete] = useState(safeDuration <= 0);
@@ -45,20 +49,37 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   useEffect(() => { onTickRef.current = onTick; });
   useEffect(() => { onCompleteRef.current = onComplete; });
 
-  // Handle dynamic duration changes: reset the countdown with new duration
+  // Handle dynamic duration changes: reset the countdown with the new
+  // duration, honoring autoStart (restart from the new duration when true,
+  // otherwise reset to a stopped state).
   useEffect(() => {
-    const newSafeDuration = Math.max(0, duration);
+    const newSafeDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0;
     if (newSafeDuration === durationRef.current) return;
 
+    const shouldRun = autoStart && newSafeDuration > 0;
     durationRef.current = newSafeDuration;
     accumulatedMsRef.current = 0;
-    startedAtRef.current = null;
+    startedAtRef.current = shouldRun ? Date.now() : null;
     completeFiredRef.current = newSafeDuration <= 0;
-    isRunningRef.current = false;
+    isRunningRef.current = shouldRun;
     setElapsedMs(0);
-    setIsRunning(false);
+    setIsRunning(shouldRun);
     setIsComplete(newSafeDuration <= 0);
-  }, [duration]);
+  }, [duration, autoStart]);
+
+  // Finalize the countdown: fire onComplete once, pin elapsed to the full
+  // duration, and stop. Idempotent via completeFiredRef.
+  const complete = useCallback(() => {
+    if (completeFiredRef.current) return;
+    completeFiredRef.current = true;
+    accumulatedMsRef.current = durationRef.current;
+    startedAtRef.current = null;
+    isRunningRef.current = false;
+    setElapsedMs(durationRef.current);
+    setIsRunning(false);
+    setIsComplete(true);
+    onCompleteRef.current?.();
+  }, []);
 
   const tick = useCallback(() => {
     if (startedAtRef.current === null) return;
@@ -70,28 +91,42 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     setElapsedMs(totalElapsed);
     onTickRef.current?.(remaining);
 
-    if (remaining <= 0 && !completeFiredRef.current) {
-      completeFiredRef.current = true;
-      accumulatedMsRef.current = durationRef.current;
-      startedAtRef.current = null;
-      isRunningRef.current = false;
-      setIsRunning(false);
-      setIsComplete(true);
-      onCompleteRef.current?.();
+    if (remaining <= 0) {
+      complete();
     }
-  }, []);
+  }, [complete]);
 
-  useInterval(tick, isRunning ? interval : null);
+  // Schedule each tick to the next interval boundary, but never past the
+  // deadline: the final tick fires exactly when the countdown reaches 0 so
+  // onComplete/isComplete are not delayed to the next interval boundary.
+  const nextDelay = useCallback((): number | null => {
+    if (startedAtRef.current === null) return null;
+    const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
+    const remaining = durationRef.current - elapsed;
+    if (remaining <= 0) return null;
+    const nextBoundary =
+      Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
+    return Math.min(nextBoundary - elapsed, remaining);
+  }, [safeInterval]);
+
+  useInterval(tick, isRunning ? nextDelay : null);
 
   const remainingMs = Math.max(0, safeDuration - elapsedMs);
 
   const start = useCallback(() => {
     if (completeFiredRef.current) return;
     if (isRunningRef.current) return;
+    // Resuming already at/past the deadline (e.g. stopped right at 0 before the
+    // completion tick fired, or a stall pushed accumulated past the duration):
+    // complete now instead of arming a schedule that nextDelay would refuse.
+    if (accumulatedMsRef.current >= durationRef.current) {
+      complete();
+      return;
+    }
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
-  }, []);
+  }, [complete]);
 
   const stop = useCallback(() => {
     if (!isRunningRef.current) return;
@@ -123,14 +158,16 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
 
   const restart = useCallback(() => {
     reset();
-    // Schedule start after reset state flushes — use a microtask to allow
-    // React to process the reset state updates first.
+    // reset() queues its state updates (including isRunning=false); we then
+    // set the running refs and isRunning=true synchronously. React batches
+    // both updates into a single render, so the started state wins — no
+    // intermediate "stopped" render is committed.
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
   }, [reset]);
 
-  const formatted = formatTime(remainingMs, format);
+  const formatted = formatTime(remainingMs, format, formatWarnRef.current);
 
   return {
     remainingMs,
@@ -143,12 +180,4 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     toggle,
     restart,
   };
-}
-
-/**
- * Reset the one-time duration warning flag. Exposed for testing only.
- * @internal
- */
-export function _resetCountdownWarning(): void {
-  warnedDurationOnce = false;
 }
