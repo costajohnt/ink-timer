@@ -520,26 +520,29 @@ describe('useCountdown', () => {
     it('completes exactly at the deadline after pausing across a boundary', async () => {
       const onComplete = vi.fn();
       let instance: ReturnType<typeof render>;
+      // Duration 4500 with a 1000ms interval: the deadline (4500) does NOT
+      // coincide with an interval boundary, so a fixed setInterval would
+      // complete late at 5000 — this test discriminates the two.
       await act(() => {
         instance = render(
           React.createElement(CountdownHarness, {
-            duration: 5000,
+            duration: 4500,
             interval: 1000,
             onComplete,
           }),
         );
       });
 
-      // Run 2s, remaining 3000.
+      // Run 2s, remaining 2500.
       await advanceTimers(2000);
       let state = parseFrame(instance!.lastFrame());
-      expect(state.remainingMs).toBe(3000);
+      expect(state.remainingMs).toBe(2500);
 
       // Pause and let a lot of wall-clock pass; elapsed must not advance.
       await act(() => {
         instance!.rerender(
           React.createElement(CountdownHarness, {
-            duration: 5000,
+            duration: 4500,
             interval: 1000,
             onComplete,
             action: 'stop',
@@ -548,26 +551,149 @@ describe('useCountdown', () => {
       });
       await advanceTimers(10_000);
       state = parseFrame(instance!.lastFrame());
-      expect(state.remainingMs).toBe(3000);
+      expect(state.remainingMs).toBe(2500);
       expect(state.isRunning).toBe(false);
 
-      // Resume and run the remaining 3s; completes exactly at the deadline.
+      // Resume and run the remaining 2.5s; completes exactly at the deadline
+      // (4500ms elapsed), not at the next 1000ms boundary (5000ms).
       await act(() => {
         instance!.rerender(
           React.createElement(CountdownHarness, {
-            duration: 5000,
+            duration: 4500,
             interval: 1000,
             onComplete,
             action: 'start',
           }),
         );
       });
-      await advanceTimers(3000);
+      await advanceTimers(2500);
       state = parseFrame(instance!.lastFrame());
       expect(state.remainingMs).toBe(0);
       expect(state.isComplete).toBe(true);
       expect(onComplete).toHaveBeenCalledTimes(1);
 
+      instance!.unmount();
+    });
+
+    it('completes on resume when paused at/after the deadline', async () => {
+      const onComplete = vi.fn();
+      let instance: ReturnType<typeof render>;
+      await act(() => {
+        instance = render(
+          React.createElement(CountdownHarness, {
+            duration: 3000,
+            interval: 1000,
+            onComplete,
+          }),
+        );
+      });
+
+      // Run 1s (remaining 2000).
+      await advanceTimers(1000);
+
+      // Simulate the event loop being blocked past the deadline: jump the
+      // clock WITHOUT firing the pending timers, then pause. stop() banks
+      // elapsed that now exceeds the duration while the completion tick never
+      // ran, so completeFired is still false.
+      await act(() => {
+        vi.setSystemTime(new Date('2026-01-01T00:00:05.000Z'));
+        instance!.rerender(
+          React.createElement(CountdownHarness, {
+            duration: 3000,
+            interval: 1000,
+            onComplete,
+            action: 'stop',
+          }),
+        );
+      });
+      let state = parseFrame(instance!.lastFrame());
+      expect(state.isComplete).toBe(false);
+      expect(onComplete).not.toHaveBeenCalled();
+
+      // Resume: must complete immediately, not freeze forever with onComplete
+      // silently dropped.
+      await act(() => {
+        instance!.rerender(
+          React.createElement(CountdownHarness, {
+            duration: 3000,
+            interval: 1000,
+            onComplete,
+            action: 'start',
+          }),
+        );
+      });
+      await advanceTimers(100);
+
+      state = parseFrame(instance!.lastFrame());
+      expect(state.isComplete).toBe(true);
+      expect(state.isRunning).toBe(false);
+      expect(state.remainingMs).toBe(0);
+      expect(onComplete).toHaveBeenCalledTimes(1);
+
+      instance!.unmount();
+    });
+  });
+
+  describe('edge-case input handling', () => {
+    it('does not fire onComplete when duration is changed to 0 dynamically', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const onComplete = vi.fn();
+      let instance: ReturnType<typeof render>;
+      await act(() => {
+        instance = render(
+          React.createElement(CountdownHarness, {
+            duration: 10_000,
+            interval: 1000,
+            onComplete,
+          }),
+        );
+      });
+
+      await advanceTimers(3000);
+
+      // Changing duration to 0 marks the countdown complete (a reset to an
+      // already-elapsed state) but does NOT invoke onComplete, which is
+      // reserved for actually counting down to zero.
+      await act(() => {
+        instance!.rerender(
+          React.createElement(CountdownHarness, {
+            duration: 0,
+            interval: 1000,
+            onComplete,
+          }),
+        );
+      });
+      await advanceTimers(100);
+
+      const state = parseFrame(instance!.lastFrame());
+      expect(state.remainingMs).toBe(0);
+      expect(state.isComplete).toBe(true);
+      expect(state.isRunning).toBe(false);
+      expect(onComplete).not.toHaveBeenCalled();
+
+      warnSpy.mockRestore();
+      instance!.unmount();
+    });
+
+    it('treats a non-finite (NaN) duration as invalid and completes immediately', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      let instance: ReturnType<typeof render>;
+      await act(() => {
+        instance = render(
+          React.createElement(CountdownHarness, { duration: Number.NaN }),
+        );
+      });
+
+      // No tight loop: advancing time must not accumulate elapsed.
+      await advanceTimers(5000);
+      const state = parseFrame(instance!.lastFrame());
+      expect(state.remainingMs).toBe(0);
+      expect(state.isComplete).toBe(true);
+      expect(state.isRunning).toBe(false);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('useCountdown received duration=NaN'),
+      );
+      warnSpy.mockRestore();
       instance!.unmount();
     });
   });

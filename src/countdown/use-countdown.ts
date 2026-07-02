@@ -17,18 +17,20 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const warnedDurationRef = useRef(false);
   const formatWarnRef = useRef<WarnOnce>({ warned: false });
 
-  // Validate duration at dev time (once per hook instance).
-  if (duration <= 0) {
+  // Validate duration at dev time (once per hook instance). A non-finite or
+  // non-positive duration is invalid and completes immediately.
+  const durationInvalid = !Number.isFinite(duration) || duration <= 0;
+  if (durationInvalid) {
     if (process.env['NODE_ENV'] !== 'production' && !warnedDurationRef.current) {
       warnedDurationRef.current = true;
       console.warn(
         `[ink-timer] useCountdown received duration=${duration}. ` +
-        'Duration must be > 0. The countdown will be immediately complete.',
+        'Duration must be a finite number > 0. The countdown will be immediately complete.',
       );
     }
   }
 
-  const safeDuration = Math.max(0, duration);
+  const safeDuration = durationInvalid ? 0 : duration;
 
   const [isRunning, setIsRunning] = useState(autoStart && safeDuration > 0);
   const [isComplete, setIsComplete] = useState(safeDuration <= 0);
@@ -51,7 +53,7 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   // duration, honoring autoStart (restart from the new duration when true,
   // otherwise reset to a stopped state).
   useEffect(() => {
-    const newSafeDuration = Math.max(0, duration);
+    const newSafeDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0;
     if (newSafeDuration === durationRef.current) return;
 
     const shouldRun = autoStart && newSafeDuration > 0;
@@ -65,6 +67,20 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     setIsComplete(newSafeDuration <= 0);
   }, [duration, autoStart]);
 
+  // Finalize the countdown: fire onComplete once, pin elapsed to the full
+  // duration, and stop. Idempotent via completeFiredRef.
+  const complete = useCallback(() => {
+    if (completeFiredRef.current) return;
+    completeFiredRef.current = true;
+    accumulatedMsRef.current = durationRef.current;
+    startedAtRef.current = null;
+    isRunningRef.current = false;
+    setElapsedMs(durationRef.current);
+    setIsRunning(false);
+    setIsComplete(true);
+    onCompleteRef.current?.();
+  }, []);
+
   const tick = useCallback(() => {
     if (startedAtRef.current === null) return;
 
@@ -75,16 +91,10 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     setElapsedMs(totalElapsed);
     onTickRef.current?.(remaining);
 
-    if (remaining <= 0 && !completeFiredRef.current) {
-      completeFiredRef.current = true;
-      accumulatedMsRef.current = durationRef.current;
-      startedAtRef.current = null;
-      isRunningRef.current = false;
-      setIsRunning(false);
-      setIsComplete(true);
-      onCompleteRef.current?.();
+    if (remaining <= 0) {
+      complete();
     }
-  }, []);
+  }, [complete]);
 
   // Schedule each tick to the next interval boundary, but never past the
   // deadline: the final tick fires exactly when the countdown reaches 0 so
@@ -106,10 +116,17 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const start = useCallback(() => {
     if (completeFiredRef.current) return;
     if (isRunningRef.current) return;
+    // Resuming already at/past the deadline (e.g. stopped right at 0 before the
+    // completion tick fired, or a stall pushed accumulated past the duration):
+    // complete now instead of arming a schedule that nextDelay would refuse.
+    if (accumulatedMsRef.current >= durationRef.current) {
+      complete();
+      return;
+    }
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
-  }, []);
+  }, [complete]);
 
   const stop = useCallback(() => {
     if (!isRunningRef.current) return;

@@ -85,7 +85,9 @@ export function useInterval(
 export function useClampedInterval(interval: number): number {
   const warned = useRef(false);
 
-  if (interval <= 0) {
+  // `NaN <= 0` is false, so a non-finite interval would otherwise slip through
+  // and produce setTimeout(NaN) -> 0ms, a tight loop. Guard explicitly.
+  if (!Number.isFinite(interval) || interval <= 0) {
     if (process.env['NODE_ENV'] !== 'production' && !warned.current) {
       warned.current = true;
       console.warn(
