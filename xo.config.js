@@ -83,6 +83,8 @@ const xoConfig = [
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 			'@typescript-eslint/no-unsafe-return': 'off',
 			'@typescript-eslint/no-unsafe-argument': 'off',
+			// Mock accessors (e.g. `onTick.mock.calls.length`) are loosely typed.
+			'@typescript-eslint/restrict-plus-operands': 'off',
 			// `await act(...)` / `await advanceTimers(...)` are the standard
 			// React testing patterns; XO flags them as non-thenable awaits.
 			'@typescript-eslint/await-thenable': 'off',

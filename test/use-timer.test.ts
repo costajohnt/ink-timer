@@ -265,6 +265,82 @@ describe('useTimer', () => {
     instance!.unmount();
   });
 
+  it('re-aligns the next tick to the elapsed boundary after a non-boundary pause', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(TimerWithControls, { interval: 1000, onTick }),
+      );
+    });
+
+    // Tick at 1000, then move to 1300 (a non-boundary offset) and pause.
+    await advanceTimers(1000);
+    await advanceTimers(300);
+    await act(() => {
+      instance!.rerender(
+        React.createElement(TimerWithControls, { interval: 1000, onTick, action: 'stop' }),
+      );
+    });
+    await advanceTimers(100);
+    const ticksBefore = onTick.mock.calls.length;
+
+    // Resume. Elapsed is 1300, so the next tick must land on the 2000 boundary
+    // (700ms later), NOT at resume+1000 (which would be elapsed 2300). A fixed
+    // setInterval would fire at resume+1000; the boundary scheduler fires at 700ms.
+    await act(() => {
+      instance!.rerender(
+        React.createElement(TimerWithControls, { interval: 1000, onTick, action: 'start' }),
+      );
+    });
+
+    await advanceTimers(699);
+    expect(onTick.mock.calls.length).toBe(ticksBefore);
+
+    await advanceTimers(1);
+    expect(onTick.mock.calls.length).toBe(ticksBefore + 1);
+    expect(onTick).toHaveBeenLastCalledWith(2000);
+
+    instance!.unmount();
+  });
+
+  it('fires one tick per crossed boundary when advanced in a single step', async () => {
+    // Fake-timer catch-up semantics: a single advanceTimersByTime that spans
+    // multiple boundaries fires the callback once per boundary (5 ticks over
+    // 5000ms), because each fired timeout synchronously schedules the next.
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(TimerHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    await advanceTimers(5000);
+    expect(onTick).toHaveBeenCalledTimes(5);
+    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000, 4000, 5000]);
+
+    instance!.unmount();
+  });
+
+  it('fires exactly one tick across a split advance straddling a boundary', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(TimerHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    await advanceTimers(999);
+    expect(onTick).not.toHaveBeenCalled();
+    await advanceTimers(2);
+    expect(onTick).toHaveBeenCalledTimes(1);
+    expect(onTick).toHaveBeenLastCalledWith(1000);
+
+    instance!.unmount();
+  });
+
   it('toggles between running and stopped', async () => {
     let instance: ReturnType<typeof render>;
     await act(() => {

@@ -245,6 +245,60 @@ describe('useStopwatch', () => {
     instance!.unmount();
   });
 
+  it('keeps ticks aligned to interval boundaries', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    await advanceTimers(3000);
+    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000]);
+
+    instance!.unmount();
+  });
+
+  it('re-aligns the next tick to the elapsed boundary after a non-boundary pause', async () => {
+    const onTick = vi.fn();
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+      );
+    });
+
+    // Tick at 1000, then move to 1300 (a non-boundary offset) and pause.
+    await advanceTimers(1000);
+    await advanceTimers(300);
+    await act(() => {
+      instance!.rerender(
+        React.createElement(StopwatchHarness, { interval: 1000, onTick, action: 'stop' }),
+      );
+    });
+    await advanceTimers(100);
+    const ticksBefore = onTick.mock.calls.length;
+
+    // Resume. Elapsed is 1300, so the next tick must land on the 2000 boundary
+    // (700ms later), NOT at resume+1000 (elapsed 2300). A fixed setInterval
+    // would fire at resume+1000; the boundary scheduler fires at 700ms.
+    await act(() => {
+      instance!.rerender(
+        React.createElement(StopwatchHarness, { interval: 1000, onTick, action: 'start' }),
+      );
+    });
+
+    await advanceTimers(699);
+    expect(onTick.mock.calls.length).toBe(ticksBefore);
+
+    await advanceTimers(1);
+    expect(onTick.mock.calls.length).toBe(ticksBefore + 1);
+    expect(onTick).toHaveBeenLastCalledWith(2000);
+
+    instance!.unmount();
+  });
+
   it('toggle switches between running and stopped', async () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
