@@ -49,7 +49,7 @@ export function useInterval(
     let id: ReturnType<typeof setTimeout> | undefined;
 
     const loop = () => {
-      const current = savedDelay.current;
+      const { current } = savedDelay;
       const value = typeof current === 'function' ? current() : current;
       if (value === null) {
         return;
@@ -74,7 +74,6 @@ export function useInterval(
     };
     // `delay` identity is the re-subscribe signal: a changed number, a toggle
     // to/from null, or a new memoized function (e.g. an interval change).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [delay]);
 }
 

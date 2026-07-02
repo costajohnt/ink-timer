@@ -31,6 +31,8 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "xo",
+    "lint:fix": "xo --fix",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
@@ -46,12 +48,15 @@
   "devDependencies": {
     "@types/node": "^25.5.0",
     "@types/react": "^19.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "ink": "^6.8.0",
     "ink-testing-library": "^4.0.0",
     "react": "^19.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "xo": "^2.0.2"
   },
   "keywords": [
     "ink",
