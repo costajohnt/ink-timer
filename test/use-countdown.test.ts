@@ -697,4 +697,37 @@ describe('useCountdown', () => {
       instance!.unmount();
     });
   });
+
+  it('flushes the partial interval into remainingMs on stop', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(CountdownHarness, {
+          duration: 5000,
+          interval: 1000,
+        }),
+      );
+    });
+
+    // 1400ms elapsed: the last tick was at 1000, so state is one partial
+    // interval (400ms) behind the true elapsed time.
+    await advanceTimers(1400);
+    expect(parseFrame(instance!.lastFrame()).remainingMs).toBe(4000);
+
+    await act(() => {
+      instance!.rerender(
+        React.createElement(CountdownHarness, {
+          duration: 5000,
+          interval: 1000,
+          action: 'stop',
+        }),
+      );
+    });
+
+    const state = parseFrame(instance!.lastFrame());
+    expect(state.isRunning).toBe(false);
+    expect(state.remainingMs).toBe(3600);
+
+    instance!.unmount();
+  });
 });

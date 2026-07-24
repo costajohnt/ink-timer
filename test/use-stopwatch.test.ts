@@ -327,4 +327,30 @@ describe('useStopwatch', () => {
 
     instance!.unmount();
   });
+
+  it('flushes the partial interval into elapsedMs on stop', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(StopwatchHarness, { interval: 1000 }),
+      );
+    });
+
+    // 1400ms elapsed: the last tick was at 1000, so state is one partial
+    // interval (400ms) behind the true elapsed time.
+    await advanceTimers(1400);
+    expect(parseFrame(instance!.lastFrame()).elapsedMs).toBe(1000);
+
+    await act(() => {
+      instance!.rerender(
+        React.createElement(StopwatchHarness, { interval: 1000, action: 'stop' }),
+      );
+    });
+
+    const state = parseFrame(instance!.lastFrame());
+    expect(state.isRunning).toBe(false);
+    expect(state.elapsedMs).toBe(1400);
+
+    instance!.unmount();
+  });
 });

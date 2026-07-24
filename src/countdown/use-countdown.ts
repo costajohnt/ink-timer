@@ -133,6 +133,10 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     if (startedAtRef.current !== null) {
       accumulatedMsRef.current += Date.now() - startedAtRef.current;
       startedAtRef.current = null;
+      // Flush the partial interval into state so the paused snapshot
+      // (elapsedMs, and thus remainingMs) is exact instead of up to one
+      // interval behind.
+      setElapsedMs(accumulatedMsRef.current);
     }
     isRunningRef.current = false;
     setIsRunning(false);
