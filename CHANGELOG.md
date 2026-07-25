@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/costajohnt/ink-timer/compare/v0.2.1...v0.2.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* flush partial interval into elapsedMs/remainingMs on stop() ([cd47390](https://github.com/costajohnt/ink-timer/commit/cd4739075bcead0763a48ec9648f36fbd9cf442a)), closes [#7](https://github.com/costajohnt/ink-timer/issues/7)
+
 ## 0.2.1 (2026-07-01)
 
 ### Bug Fixes
