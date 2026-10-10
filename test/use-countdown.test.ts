@@ -730,4 +730,61 @@ describe('useCountdown', () => {
 
     instance!.unmount();
   });
+  it('rounds remaining time up when paused mid-second (pause at 4.3s of 5s shows 00:01)', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(CountdownHarness, {
+          duration: 5000,
+          interval: 1000,
+        }),
+      );
+    });
+
+    await advanceTimers(4300);
+    await act(() => {
+      instance!.rerender(
+        React.createElement(CountdownHarness, {
+          duration: 5000,
+          interval: 1000,
+          action: 'stop',
+        }),
+      );
+    });
+
+    const state = parseFrame(instance!.lastFrame());
+    expect(state.remainingMs).toBe(700);
+    expect(state.isComplete).toBe(false);
+    expect(state.isRunning).toBe(false);
+    expect(state.text).toBe('00:01');
+
+    instance!.unmount();
+  });
+
+  it('never shows 00:00 while a non-whole-second countdown is running', async () => {
+    let instance: ReturnType<typeof render>;
+    await act(() => {
+      instance = render(
+        React.createElement(CountdownHarness, {
+          duration: 5500,
+          interval: 1000,
+        }),
+      );
+    });
+
+    expect(parseFrame(instance!.lastFrame()).text).toBe('00:06');
+
+    await advanceTimers(5000);
+    let state = parseFrame(instance!.lastFrame());
+    expect(state.remainingMs).toBe(500);
+    expect(state.isComplete).toBe(false);
+    expect(state.text).toBe('00:01');
+
+    await advanceTimers(500);
+    state = parseFrame(instance!.lastFrame());
+    expect(state.isComplete).toBe(true);
+    expect(state.text).toBe('00:00');
+
+    instance!.unmount();
+  });
 });

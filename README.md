@@ -295,6 +295,10 @@ Same as `"human"` but with milliseconds appended.
 1h 1m 1.12s -> 1h 1m 1s 123ms
 ```
 
+### Rounding
+
+Timers and stopwatches round sub-second time down: `"digital"` shows `00:01` once a full second has elapsed. Countdowns round remaining time up for the second-resolution presets (`"digital"`, `"human"`), so a countdown shows `00:01` until it actually completes and only reads `00:00` when `isComplete` is true. The `-ms` presets are exact, and custom format functions receive the raw millisecond value.
+
 ### Custom Format Function
 
 Pass a function that receives milliseconds and returns a string.

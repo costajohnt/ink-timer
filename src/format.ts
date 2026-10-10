@@ -76,6 +76,25 @@ function resolveFormatter(format: FormatOption | undefined): FormatFunction {
 }
 
 /**
+ * How sub-second remainders are handled by second-resolution output.
+ * Count-up values (timer, stopwatch) use 'floor': a value is shown once it
+ * has been reached. Count-down values (countdown remaining time) use 'ceil':
+ * the display reads 00:00 only once the countdown is actually complete.
+ */
+export type Rounding = 'floor' | 'ceil';
+
+/** Round a value up to the next whole second when rounding is 'ceil'. */
+function roundToSecond(totalMs: number, rounding: Rounding): number {
+  const ms = Math.max(0, totalMs);
+  return rounding === 'ceil' ? Math.ceil(ms / 1000) * 1000 : ms;
+}
+
+/** Presets whose output has no sub-second component. */
+function isSecondResolutionPreset(format: FormatOption | undefined): boolean {
+  return format === undefined || format === 'digital' || format === 'human';
+}
+
+/**
  * Mutable one-shot warning context. Callers (e.g. each hook instance) own
  * their own object so a warning fires once per caller instead of once per
  * process. See `formatTime`.
@@ -91,18 +110,27 @@ export interface WarnOnce {
  * a dev-mode warning is emitted, and the 'digital' preset is used as a
  * fallback. Pass a `warnOnce` context to deduplicate the warning across
  * repeated calls from the same caller; without one, every failing call warns.
+ *
+ * With `rounding: 'ceil'` the second-resolution presets ('digital', 'human')
+ * round up to the next whole second, and the hours/minutes/seconds fields
+ * match the displayed text. Millisecond presets are exact either way, and
+ * custom format functions always receive the raw value.
  */
 export function formatTime(
   totalMs: number,
   format: FormatOption | undefined,
   warnOnce?: WarnOnce,
+  rounding: Rounding = 'floor',
 ): FormattedTime {
-  const { hours, minutes, seconds, milliseconds } = decompose(totalMs);
+  const displayMs = isSecondResolutionPreset(format)
+    ? roundToSecond(totalMs, rounding)
+    : totalMs;
+  const { hours, minutes, seconds, milliseconds } = decompose(displayMs);
   const formatter = resolveFormatter(format);
 
   let text: string;
   try {
-    text = formatter(totalMs);
+    text = formatter(displayMs);
   } catch (err) {
     if (process.env['NODE_ENV'] !== 'production' && !warnOnce?.warned) {
       if (warnOnce) warnOnce.warned = true;
@@ -112,7 +140,7 @@ export function formatTime(
         err,
       );
     }
-    text = presets.digital(totalMs);
+    text = presets.digital(roundToSecond(totalMs, rounding));
   }
 
   return {
@@ -128,9 +156,15 @@ export function formatTime(
 /**
  * Build a human-readable time description for screen readers.
  * E.g. 150000ms → "2 minutes 30 seconds"
+ *
+ * Pass `rounding: 'ceil'` for remaining time so the description does not
+ * read "0 seconds" while time is still left.
  */
-export function buildAriaTimeDescription(totalMs: number): string {
-  const { hours, minutes, seconds } = decompose(totalMs);
+export function buildAriaTimeDescription(
+  totalMs: number,
+  rounding: Rounding = 'floor',
+): string {
+  const { hours, minutes, seconds } = decompose(roundToSecond(totalMs, rounding));
   const parts: string[] = [];
   if (hours > 0) parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
   if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`);

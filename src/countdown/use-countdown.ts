@@ -171,7 +171,7 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     setIsRunning(true);
   }, [reset]);
 
-  const formatted = formatTime(remainingMs, format, formatWarnRef.current);
+  const formatted = formatTime(remainingMs, format, formatWarnRef.current, 'ceil');
 
   return {
     remainingMs,
