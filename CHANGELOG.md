@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/costajohnt/ink-timer/compare/v0.2.2...v0.2.3) (2026-10-10)
+
+
+### Bug Fixes
+
+* round countdown remaining time up for second-resolution display ([#11](https://github.com/costajohnt/ink-timer/issues/11)) ([72a51e2](https://github.com/costajohnt/ink-timer/commit/72a51e223d4e8d220106ec6bec886c13260ae39b)), closes [#10](https://github.com/costajohnt/ink-timer/issues/10)
+
 ## [0.2.2](https://github.com/costajohnt/ink-timer/compare/v0.2.1...v0.2.2) (2026-07-24)
 
 
