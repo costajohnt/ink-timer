@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/costajohnt/ink-timer/compare/v0.2.3...v0.2.4) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** patch dev dependency advisories ([#13](https://github.com/costajohnt/ink-timer/issues/13)) ([4a5c617](https://github.com/costajohnt/ink-timer/commit/4a5c617ef4e9241b75fc6f8a0f114bac13ac7961))
+
 ## [0.2.3](https://github.com/costajohnt/ink-timer/compare/v0.2.2...v0.2.3) (2026-10-10)
 
 
