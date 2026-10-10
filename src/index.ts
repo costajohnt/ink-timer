@@ -10,6 +10,7 @@ export { Stopwatch } from './stopwatch/index.js';
 
 // Accessibility utilities
 export { buildAriaTimeDescription } from './format.js';
+export type { Rounding } from './format.js';
 
 // Types (re-export all public types for consumers)
 export type {

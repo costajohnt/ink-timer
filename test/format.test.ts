@@ -222,3 +222,43 @@ describe('resolveComponentFormat', () => {
     expect(resolveComponentFormat(fn, true)).toBe(fn);
   });
 });
+
+describe('ceil rounding (countdown remaining time)', () => {
+  it('rounds second-resolution presets up and keeps fields consistent', () => {
+    const result = formatTime(700, 'digital', undefined, 'ceil');
+    expect(result.text).toBe('00:01');
+    expect(result.seconds).toBe(1);
+    expect(result.milliseconds).toBe(0);
+    expect(result.totalMs).toBe(700);
+  });
+
+  it('applies to the default and human presets', () => {
+    expect(formatTime(59_001, undefined, undefined, 'ceil').text).toBe('01:00');
+    expect(formatTime(1500, 'human', undefined, 'ceil').text).toBe('2s');
+  });
+
+  it('leaves whole seconds and zero unchanged', () => {
+    expect(formatTime(5000, 'digital', undefined, 'ceil').text).toBe('00:05');
+    expect(formatTime(0, 'digital', undefined, 'ceil').text).toBe('00:00');
+  });
+
+  it('keeps millisecond presets exact', () => {
+    expect(formatTime(700, 'digital-ms', undefined, 'ceil').text).toBe('00:00.700');
+    expect(formatTime(700, 'human-ms', undefined, 'ceil').text).toBe('0s 700ms');
+  });
+
+  it('passes the raw value to custom format functions', () => {
+    const fn = vi.fn((ms: number) => `${ms}ms`);
+    expect(formatTime(700, fn, undefined, 'ceil').text).toBe('700ms');
+    expect(fn).toHaveBeenCalledWith(700);
+  });
+
+  it('defaults to floor', () => {
+    expect(formatTime(700, 'digital').text).toBe('00:00');
+  });
+
+  it('rounds the aria description up', () => {
+    expect(buildAriaTimeDescription(700, 'ceil')).toBe('1 second');
+    expect(buildAriaTimeDescription(700)).toBe('0 seconds');
+  });
+});

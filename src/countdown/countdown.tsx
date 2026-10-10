@@ -42,7 +42,7 @@ export function Countdown({
   );
 
   const screenReader = useIsScreenReaderEnabled();
-  const timeDescription = buildAriaTimeDescription(formatted.totalMs);
+  const timeDescription = buildAriaTimeDescription(formatted.totalMs, 'ceil');
   let ariaLabel: string;
   if (isComplete) {
     ariaLabel = 'Countdown complete';
