@@ -6,12 +6,12 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import React, {act} from 'react';
+import React from 'react';
 import {render} from 'ink-testing-library';
 import {Text} from 'ink';
 import {useStopwatch} from '../src/stopwatch/use-stopwatch.js';
 import type {UseStopwatchOptions} from '../src/types.js';
-import {advanceTimers} from './helpers.js';
+import {act, advanceTimers} from './helpers.js';
 
 function StopwatchHarness(
   props: UseStopwatchOptions & {action?: 'start' | 'stop' | 'reset' | 'lap' | 'toggle'},
@@ -19,27 +19,11 @@ function StopwatchHarness(
   const {action, ...options} = props;
   const sw = useStopwatch(options);
 
+  // Action callbacks are stable, so this fires only when `action` changes.
+  const runAction = action === undefined ? undefined : sw[action];
   React.useEffect(() => {
-    if (action === 'start') {
-      sw.start();
-    }
-
-    if (action === 'stop') {
-      sw.stop();
-    }
-
-    if (action === 'reset') {
-      sw.reset();
-    }
-
-    if (action === 'lap') {
-      sw.lap();
-    }
-
-    if (action === 'toggle') {
-      sw.toggle();
-    }
-  }, [action]);
+    runAction?.();
+  }, [runAction]);
 
   // Use short keys to keep JSON output under Ink's 100-char line width
   const cl = sw.laps.map(l => ({

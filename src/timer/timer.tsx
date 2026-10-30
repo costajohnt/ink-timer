@@ -33,7 +33,11 @@ export function Timer({
   useInput(
     (input, _key) => {
       if (input === ' ') {
-        isRunning ? stop() : start();
+        if (isRunning) {
+          stop();
+        } else {
+          start();
+        }
       } else if (input === 'r' || input === 'R') {
         reset();
       }

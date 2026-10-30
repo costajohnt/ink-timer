@@ -38,10 +38,14 @@ export function Stopwatch({
   useInput(
     input => {
       if (input === ' ') {
-        isRunning ? stop() : start();
+        if (isRunning) {
+          stop();
+        } else {
+          start();
+        }
       } else if (input === 'r' || input === 'R') {
         reset();
-      } else if ((input === 'l' || input === 'L') && enableLapKey) {
+      } else if (enableLapKey && (input === 'l' || input === 'L')) {
         lap();
       }
     },

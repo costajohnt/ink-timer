@@ -6,10 +6,10 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import React, {act} from 'react';
+import React from 'react';
 import {render} from 'ink-testing-library';
 import {Countdown} from '../src/countdown/countdown.js';
-import {advanceTimers} from './helpers.js';
+import {act, advanceTimers} from './helpers.js';
 
 describe('Countdown component', () => {
   beforeEach(() => {

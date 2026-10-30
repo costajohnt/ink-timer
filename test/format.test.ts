@@ -138,9 +138,10 @@ describe('formatTime', () => {
 
 describe('custom format error handling', () => {
   it('falls back to digital when custom format throws', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const broken = () => {
-      throw new Error('boom');};
+      throw new Error('boom');
+    };
 
     const result = formatTime(5000, broken);
     expect(result.text).toBe('00:05');
@@ -152,9 +153,10 @@ describe('custom format error handling', () => {
   });
 
   it('warns only once per warn context for repeated errors', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const broken = () => {
-      throw new Error('boom');};
+      throw new Error('boom');
+    };
 
     const warnOnce = {warned: false};
     formatTime(1000, broken, warnOnce);
@@ -165,9 +167,10 @@ describe('custom format error handling', () => {
   });
 
   it('uses independent warn contexts per caller', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const broken = () => {
-      throw new Error('boom');};
+      throw new Error('boom');
+    };
 
     const a = {warned: false};
     const b = {warned: false};

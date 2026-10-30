@@ -6,11 +6,11 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import React, {act} from 'react';
+import React from 'react';
 import {render} from 'ink-testing-library';
 import {Text} from 'ink';
 import {useInterval, useClampedInterval} from '../src/use-interval.js';
-import {advanceTimers} from './helpers.js';
+import {act, advanceTimers} from './helpers.js';
 
 function IntervalTester({
   delay,
@@ -195,7 +195,7 @@ describe('useClampedInterval', () => {
   });
 
   it('clamps a zero interval to the 16ms minimum and keeps ticking', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const onTick = vi.fn();
     let instance: ReturnType<typeof render>;
     await act(() => {
@@ -214,7 +214,7 @@ describe('useClampedInterval', () => {
   });
 
   it('clamps a non-finite (NaN) interval to the 16ms minimum instead of a tight loop', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const onTick = vi.fn();
     let instance: ReturnType<typeof render>;
     await act(() => {
@@ -234,7 +234,7 @@ describe('useClampedInterval', () => {
   });
 
   it('warns once per instance, independently across instances', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const onTick = vi.fn();
     let instance: ReturnType<typeof render>;
     await act(() => {

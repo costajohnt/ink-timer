@@ -39,9 +39,11 @@ export function useStopwatch(
   const formatWarnRef = useRef<WarnOnce>({warned: false});
 
   useEffect(() => {
-    onTickRef.current = onTick;});
+    onTickRef.current = onTick;
+  });
   useEffect(() => {
-    onLapRef.current = onLap;});
+    onLapRef.current = onLap;
+  });
 
   const tick = useCallback(() => {
     if (startedAtRef.current === null) {
@@ -62,7 +64,7 @@ export function useStopwatch(
 
     const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     const nextBoundary =
-      Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
+      (Math.floor(elapsed / safeInterval) * safeInterval) + safeInterval;
     return nextBoundary - elapsed;
   }, [safeInterval]);
 

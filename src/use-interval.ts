@@ -13,31 +13,31 @@ const MIN_INTERVAL_MS = 16;
  Instead of `setInterval`, each tick is scheduled with `setTimeout` and the
  next delay is recomputed after every fire. This keeps ticks aligned to the
  caller's timestamp anchors (no drift, no skipped/repeated display values).
- *
- * The `delay` argument may be:
- * - `null`  — paused, nothing is scheduled.
- * - a number — fixed delay in ms.
- * - a function returning `number | null` — recomputed after each tick; return
- *   `null` to stop. Pass a stable (memoized) function identity: the hook
- *   re-subscribes whenever `delay` changes, so an inline closure would reset
- *   the schedule on every render.
- *
- * This hook does NOT track time itself. The callback is responsible for
- * computing elapsed time from Date.now() anchors.
+
+ The `delay` argument may be:
+ - `null`  — paused, nothing is scheduled.
+ - a number — fixed delay in ms.
+ - a function returning `number | null` — recomputed after each tick; return
+ `null` to stop. Pass a stable (memoized) function identity: the hook
+ re-subscribes whenever `delay` changes, so an inline closure would reset
+ the schedule on every render.
+
+ This hook does NOT track time itself. The callback is responsible for
+ computing elapsed time from Date.now() anchors.
  */
 export function useInterval(
   callback: () => void,
   delay: number | (() => number | null) | null,
 ): void {
-  const savedCallback = useRef(callback);
-  const savedDelay = useRef(delay);
+  const callbackRef = useRef(callback);
+  const delayRef = useRef(delay);
 
   // Update refs to the latest callback/delay on every render.
   useEffect(() => {
-    savedCallback.current = callback;
+    callbackRef.current = callback;
   });
   useEffect(() => {
-    savedDelay.current = delay;
+    delayRef.current = delay;
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function useInterval(
     let id: ReturnType<typeof setTimeout> | undefined;
 
     const loop = () => {
-      const {current} = savedDelay;
+      const {current} = delayRef;
       const value = typeof current === 'function' ? current() : current;
       if (value === null) {
         return;
@@ -60,7 +60,7 @@ export function useInterval(
           return;
         }
 
-        savedCallback.current();
+        callbackRef.current();
         loop();
       }, Math.max(0, value));
     };
@@ -84,13 +84,13 @@ export function useInterval(
  so two hook instances never share (or swallow) each other's warnings.
  */
 export function useClampedInterval(interval: number): number {
-  const warned = useRef(false);
+  const warnedRef = useRef(false);
 
   // `NaN <= 0` is false, so a non-finite interval would otherwise slip through
   // and produce setTimeout(NaN) -> 0ms, a tight loop. Guard explicitly.
   if (!Number.isFinite(interval) || interval <= 0) {
-    if (process.env['NODE_ENV'] !== 'production' && !warned.current) {
-      warned.current = true;
+    if (process.env['NODE_ENV'] !== 'production' && !warnedRef.current) {
+      warnedRef.current = true;
       console.warn(
         `[ink-timer] Received interval=${interval}. ` +
         `Clamping to ${MIN_INTERVAL_MS}ms minimum.`,

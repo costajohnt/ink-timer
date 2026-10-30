@@ -5,7 +5,7 @@
  interval callbacks must be flushed via act(). We wrap vi.advanceTimersByTime
  in act() to ensure React processes all pending state updates.
  */
-import {act} from 'react';
+import {act as reactAct} from 'react';
 import {vi} from 'vitest';
 
 /**
@@ -18,8 +18,15 @@ import {vi} from 'vitest';
  making timing assertions flaky on slower/older runtimes.
  */
 export async function advanceTimers(ms: number): Promise<void> {
-  await act(async () => {
+  await reactAct(async () => {
     vi.advanceTimersByTime(ms);
     await Promise.resolve();
   });
 }
+
+/**
+ React's `act()` with the runtime return type. React 19 returns a thenable
+ even for a synchronous callback, and awaiting it flushes any remaining async
+ act work, but `@types/react` types that overload as `void`.
+ */
+export const act = reactAct as unknown as (callback: () => void) => PromiseLike<void>;

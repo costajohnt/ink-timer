@@ -6,12 +6,12 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import React, {act} from 'react';
+import React from 'react';
 import {render} from 'ink-testing-library';
 import {Text} from 'ink';
 import {useTimer} from '../src/timer/use-timer.js';
 import type {UseTimerOptions} from '../src/types.js';
-import {advanceTimers} from './helpers.js';
+import {act, advanceTimers} from './helpers.js';
 
 function TimerHarness(props: UseTimerOptions) {
   const timer = useTimer(props);
@@ -32,23 +32,11 @@ function TimerWithControls({
 }: UseTimerOptions & {action?: 'start' | 'stop' | 'reset' | 'toggle'}) {
   const timer = useTimer(options);
 
+  // Action callbacks are stable, so this fires only when `action` changes.
+  const runAction = action === undefined ? undefined : timer[action];
   React.useEffect(() => {
-    if (action === 'start') {
-      timer.start();
-    }
-
-    if (action === 'stop') {
-      timer.stop();
-    }
-
-    if (action === 'reset') {
-      timer.reset();
-    }
-
-    if (action === 'toggle') {
-      timer.toggle();
-    }
-  }, [action]);
+    runAction?.();
+  }, [runAction]);
 
   return React.createElement(
     Text,

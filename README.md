@@ -22,7 +22,7 @@ Timer, countdown, and stopwatch hooks and components for [Ink](https://github.co
 
 ## Install
 
-```
+```sh
 npm install ink-timer
 ```
 
@@ -257,7 +257,7 @@ Renders a stopwatch display with optional lap list.
 
 Minutes and seconds, with hours added automatically when needed.
 
-```
+```text
 0s     -> 00:00
 5s     -> 00:05
 2m 30s -> 02:30
@@ -268,7 +268,7 @@ Minutes and seconds, with hours added automatically when needed.
 
 Same as `"digital"` but with milliseconds appended.
 
-```
+```text
 0s          -> 00:00.000
 2m 30.45s   -> 02:30.450
 1h 1m 1.12s -> 1:01:01.123
@@ -278,7 +278,7 @@ Same as `"digital"` but with milliseconds appended.
 
 Human-readable short units.
 
-```
+```text
 0s     -> 0s
 5s     -> 5s
 2m 30s -> 2m 30s
@@ -289,7 +289,7 @@ Human-readable short units.
 
 Same as `"human"` but with milliseconds appended.
 
-```
+```text
 0s          -> 0s 0ms
 2m 30.45s   -> 2m 30s 450ms
 1h 1m 1.12s -> 1h 1m 1s 123ms

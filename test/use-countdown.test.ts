@@ -6,12 +6,12 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import React, {act} from 'react';
+import React from 'react';
 import {render} from 'ink-testing-library';
 import {Text} from 'ink';
 import {useCountdown} from '../src/countdown/use-countdown.js';
 import type {UseCountdownOptions} from '../src/types.js';
-import {advanceTimers} from './helpers.js';
+import {act, advanceTimers} from './helpers.js';
 
 function CountdownHarness(
   props: UseCountdownOptions & {action?: 'start' | 'stop' | 'reset' | 'toggle' | 'restart'},
@@ -19,27 +19,11 @@ function CountdownHarness(
   const {action, ...options} = props;
   const cd = useCountdown(options);
 
+  // Action callbacks are stable, so this fires only when `action` changes.
+  const runAction = action === undefined ? undefined : cd[action];
   React.useEffect(() => {
-    if (action === 'start') {
-      cd.start();
-    }
-
-    if (action === 'stop') {
-      cd.stop();
-    }
-
-    if (action === 'reset') {
-      cd.reset();
-    }
-
-    if (action === 'toggle') {
-      cd.toggle();
-    }
-
-    if (action === 'restart') {
-      cd.restart();
-    }
-  }, [action]);
+    runAction?.();
+  }, [runAction]);
 
   return React.createElement(
     Text,
@@ -297,7 +281,7 @@ describe('useCountdown', () => {
   });
 
   it('warns on invalid duration (<= 0)', async () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
@@ -656,7 +640,7 @@ describe('useCountdown', () => {
 
   describe('edge-case input handling', () => {
     it('does not fire onComplete when duration is changed to 0 dynamically', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const onComplete = vi.fn();
       let instance: ReturnType<typeof render>;
       await act(() => {
@@ -696,7 +680,7 @@ describe('useCountdown', () => {
     });
 
     it('treats a non-finite (NaN) duration as invalid and completes immediately', async () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       let instance: ReturnType<typeof render>;
       await act(() => {
         instance = render(

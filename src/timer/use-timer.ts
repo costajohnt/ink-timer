@@ -51,7 +51,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
 
     const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     const nextBoundary =
-      Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
+      (Math.floor(elapsed / safeInterval) * safeInterval) + safeInterval;
     return nextBoundary - elapsed;
   }, [safeInterval]);
 
