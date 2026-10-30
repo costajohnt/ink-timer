@@ -1,24 +1,44 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Text } from 'ink';
-import { useCountdown } from '../src/countdown/use-countdown.js';
-import type { UseCountdownOptions } from '../src/types.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Text} from 'ink';
+import {useCountdown} from '../src/countdown/use-countdown.js';
+import type {UseCountdownOptions} from '../src/types.js';
+import {advanceTimers} from './helpers.js';
 
 function CountdownHarness(
-  props: UseCountdownOptions & { action?: 'start' | 'stop' | 'reset' | 'toggle' | 'restart' },
+  props: UseCountdownOptions & {action?: 'start' | 'stop' | 'reset' | 'toggle' | 'restart'},
 ) {
-  const { action, ...options } = props;
+  const {action, ...options} = props;
   const cd = useCountdown(options);
 
   React.useEffect(() => {
-    if (action === 'start') cd.start();
-    if (action === 'stop') cd.stop();
-    if (action === 'reset') cd.reset();
-    if (action === 'toggle') cd.toggle();
-    if (action === 'restart') cd.restart();
+    if (action === 'start') {
+      cd.start();
+    }
+
+    if (action === 'stop') {
+      cd.stop();
+    }
+
+    if (action === 'reset') {
+      cd.reset();
+    }
+
+    if (action === 'toggle') {
+      cd.toggle();
+    }
+
+    if (action === 'restart') {
+      cd.restart();
+    }
   }, [action]);
 
   return React.createElement(
@@ -56,7 +76,7 @@ describe('useCountdown', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(CountdownHarness, { duration: 10_000 }),
+        React.createElement(CountdownHarness, {duration: 10_000}),
       );
     });
     const state = parseFrame(instance!.lastFrame());
@@ -281,7 +301,7 @@ describe('useCountdown', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(CountdownHarness, { duration: -1000 }),
+        React.createElement(CountdownHarness, {duration: -1000}),
       );
     });
     const state = parseFrame(instance!.lastFrame());
@@ -680,7 +700,7 @@ describe('useCountdown', () => {
       let instance: ReturnType<typeof render>;
       await act(() => {
         instance = render(
-          React.createElement(CountdownHarness, { duration: Number.NaN }),
+          React.createElement(CountdownHarness, {duration: NaN}),
         );
       });
 

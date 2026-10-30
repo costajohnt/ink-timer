@@ -1,7 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useInterval, useClampedInterval } from '../use-interval.js';
-import { formatTime, type WarnOnce } from '../format.js';
-import type { UseCountdownOptions, UseCountdownResult } from '../types.js';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
+import {useInterval, useClampedInterval} from '../use-interval.js';
+import {formatTime, type WarnOnce} from '../format.js';
+import type {UseCountdownOptions, UseCountdownResult} from '../types.js';
 
 export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const {
@@ -15,22 +20,20 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
 
   const safeInterval = useClampedInterval(interval);
   const warnedDurationRef = useRef(false);
-  const formatWarnRef = useRef<WarnOnce>({ warned: false });
+  const formatWarnRef = useRef<WarnOnce>({warned: false});
 
   // Validate duration at dev time (once per hook instance). A non-finite or
   // non-positive duration is invalid and completes immediately.
-  const durationInvalid = !Number.isFinite(duration) || duration <= 0;
-  if (durationInvalid) {
-    if (process.env['NODE_ENV'] !== 'production' && !warnedDurationRef.current) {
-      warnedDurationRef.current = true;
-      console.warn(
-        `[ink-timer] useCountdown received duration=${duration}. ` +
-        'Duration must be a finite number > 0. The countdown will be immediately complete.',
-      );
-    }
+  const isDurationInvalid = !Number.isFinite(duration) || duration <= 0;
+  if (isDurationInvalid && process.env['NODE_ENV'] !== 'production' && !warnedDurationRef.current) {
+    warnedDurationRef.current = true;
+    console.warn(
+      `[ink-timer] useCountdown received duration=${duration}. ` +
+      'Duration must be a finite number > 0. The countdown will be immediately complete.',
+    );
   }
 
-  const safeDuration = durationInvalid ? 0 : duration;
+  const safeDuration = isDurationInvalid ? 0 : duration;
 
   const [isRunning, setIsRunning] = useState(autoStart && safeDuration > 0);
   const [isComplete, setIsComplete] = useState(safeDuration <= 0);
@@ -46,15 +49,19 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const completeFiredRef = useRef(safeDuration <= 0);
   const durationRef = useRef(safeDuration);
 
-  useEffect(() => { onTickRef.current = onTick; });
-  useEffect(() => { onCompleteRef.current = onComplete; });
+  useEffect(() => {onTickRef.current = onTick;
+  });
+  useEffect(() => {onCompleteRef.current = onComplete;
+  });
 
   // Handle dynamic duration changes: reset the countdown with the new
   // duration, honoring autoStart (restart from the new duration when true,
   // otherwise reset to a stopped state).
   useEffect(() => {
     const newSafeDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0;
-    if (newSafeDuration === durationRef.current) return;
+    if (newSafeDuration === durationRef.current) {
+      return;
+    }
 
     const shouldRun = autoStart && newSafeDuration > 0;
     durationRef.current = newSafeDuration;
@@ -70,7 +77,10 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   // Finalize the countdown: fire onComplete once, pin elapsed to the full
   // duration, and stop. Idempotent via completeFiredRef.
   const complete = useCallback(() => {
-    if (completeFiredRef.current) return;
+    if (completeFiredRef.current) {
+      return;
+    }
+
     completeFiredRef.current = true;
     accumulatedMsRef.current = durationRef.current;
     startedAtRef.current = null;
@@ -82,7 +92,9 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   }, []);
 
   const tick = useCallback(() => {
-    if (startedAtRef.current === null) return;
+    if (startedAtRef.current === null) {
+      return;
+    }
 
     const now = Date.now();
     const totalElapsed = accumulatedMsRef.current + (now - startedAtRef.current);
@@ -100,10 +112,16 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   // deadline: the final tick fires exactly when the countdown reaches 0 so
   // onComplete/isComplete are not delayed to the next interval boundary.
   const nextDelay = useCallback((): number | null => {
-    if (startedAtRef.current === null) return null;
+    if (startedAtRef.current === null) {
+      return null;
+    }
+
     const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     const remaining = durationRef.current - elapsed;
-    if (remaining <= 0) return null;
+    if (remaining <= 0) {
+      return null;
+    }
+
     const nextBoundary =
       Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
     return Math.min(nextBoundary - elapsed, remaining);
@@ -114,8 +132,10 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const remainingMs = Math.max(0, safeDuration - elapsedMs);
 
   const start = useCallback(() => {
-    if (completeFiredRef.current) return;
-    if (isRunningRef.current) return;
+    if (completeFiredRef.current || isRunningRef.current) {
+      return;
+    }
+
     // Resuming already at/past the deadline (e.g. stopped right at 0 before the
     // completion tick fired, or a stall pushed accumulated past the duration):
     // complete now instead of arming a schedule that nextDelay would refuse.
@@ -123,13 +143,17 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
       complete();
       return;
     }
+
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
   }, [complete]);
 
   const stop = useCallback(() => {
-    if (!isRunningRef.current) return;
+    if (!isRunningRef.current) {
+      return;
+    }
+
     if (startedAtRef.current !== null) {
       accumulatedMsRef.current += Date.now() - startedAtRef.current;
       startedAtRef.current = null;
@@ -138,6 +162,7 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
       // interval behind.
       setElapsedMs(accumulatedMsRef.current);
     }
+
     isRunningRef.current = false;
     setIsRunning(false);
   }, []);

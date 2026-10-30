@@ -1,10 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Text } from 'ink';
-import { useInterval, useClampedInterval } from '../src/use-interval.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Text} from 'ink';
+import {useInterval, useClampedInterval} from '../src/use-interval.js';
+import {advanceTimers} from './helpers.js';
 
 function IntervalTester({
   delay,
@@ -45,7 +51,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: 1000, onTick }),
+        React.createElement(IntervalTester, {delay: 1000, onTick}),
       );
     });
 
@@ -68,7 +74,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: null, onTick }),
+        React.createElement(IntervalTester, {delay: null, onTick}),
       );
     });
 
@@ -83,7 +89,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: 1000, onTick }),
+        React.createElement(IntervalTester, {delay: 1000, onTick}),
       );
     });
 
@@ -101,7 +107,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: 1000, onTick }),
+        React.createElement(IntervalTester, {delay: 1000, onTick}),
       );
     });
 
@@ -110,7 +116,7 @@ describe('useInterval', () => {
 
     await act(() => {
       instance!.rerender(
-        React.createElement(IntervalTester, { delay: null, onTick }),
+        React.createElement(IntervalTester, {delay: null, onTick}),
       );
     });
 
@@ -125,7 +131,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: 1000, onTick }),
+        React.createElement(IntervalTester, {delay: 1000, onTick}),
       );
     });
 
@@ -134,7 +140,7 @@ describe('useInterval', () => {
 
     await act(() => {
       instance!.rerender(
-        React.createElement(IntervalTester, { delay: 500, onTick }),
+        React.createElement(IntervalTester, {delay: 500, onTick}),
       );
     });
 
@@ -152,7 +158,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: getDelay, onTick }),
+        React.createElement(IntervalTester, {delay: getDelay, onTick}),
       );
     });
 
@@ -168,7 +174,7 @@ describe('useInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(IntervalTester, { delay: getDelay, onTick }),
+        React.createElement(IntervalTester, {delay: getDelay, onTick}),
       );
     });
 
@@ -194,7 +200,7 @@ describe('useClampedInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(ClampTester, { interval: 0, onTick }),
+        React.createElement(ClampTester, {interval: 0, onTick}),
       );
     });
 
@@ -213,7 +219,7 @@ describe('useClampedInterval', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(ClampTester, { interval: Number.NaN, onTick }),
+        React.createElement(ClampTester, {interval: NaN, onTick}),
       );
     });
 
@@ -236,8 +242,8 @@ describe('useClampedInterval', () => {
         React.createElement(
           React.Fragment,
           null,
-          React.createElement(ClampTester, { interval: 0, onTick }),
-          React.createElement(ClampTester, { interval: 0, onTick }),
+          React.createElement(ClampTester, {interval: 0, onTick}),
+          React.createElement(ClampTester, {interval: 0, onTick}),
         ),
       );
     });

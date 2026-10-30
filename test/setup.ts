@@ -6,7 +6,10 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 // in tests are properly wrapped in act() via the advanceTimers helper.
 const originalError = console.error;
 console.error = (...args: unknown[]) => {
-  const msg = typeof args[0] === 'string' ? args[0] : '';
-  if (msg.includes('not wrapped in act')) return;
+  const message = typeof args[0] === 'string' ? args[0] : '';
+  if (message.includes('not wrapped in act')) {
+    return;
+  }
+
   originalError.apply(console, args);
 };

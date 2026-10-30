@@ -1,28 +1,48 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Text } from 'ink';
-import { useStopwatch } from '../src/stopwatch/use-stopwatch.js';
-import type { UseStopwatchOptions } from '../src/types.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Text} from 'ink';
+import {useStopwatch} from '../src/stopwatch/use-stopwatch.js';
+import type {UseStopwatchOptions} from '../src/types.js';
+import {advanceTimers} from './helpers.js';
 
 function StopwatchHarness(
-  props: UseStopwatchOptions & { action?: 'start' | 'stop' | 'reset' | 'lap' | 'toggle' },
+  props: UseStopwatchOptions & {action?: 'start' | 'stop' | 'reset' | 'lap' | 'toggle'},
 ) {
-  const { action, ...options } = props;
+  const {action, ...options} = props;
   const sw = useStopwatch(options);
 
   React.useEffect(() => {
-    if (action === 'start') sw.start();
-    if (action === 'stop') sw.stop();
-    if (action === 'reset') sw.reset();
-    if (action === 'lap') sw.lap();
-    if (action === 'toggle') sw.toggle();
+    if (action === 'start') {
+      sw.start();
+    }
+
+    if (action === 'stop') {
+      sw.stop();
+    }
+
+    if (action === 'reset') {
+      sw.reset();
+    }
+
+    if (action === 'lap') {
+      sw.lap();
+    }
+
+    if (action === 'toggle') {
+      sw.toggle();
+    }
   }, [action]);
 
   // Use short keys to keep JSON output under Ink's 100-char line width
-  const cl = sw.laps.map((l) => ({
+  const cl = sw.laps.map(l => ({
     n: l.number,
     d: l.durationMs,
     c: l.cumulativeMs,
@@ -40,11 +60,11 @@ function StopwatchHarness(
   );
 }
 
-interface CompactLap {
+type CompactLap = {
   n: number;
   d: number;
   c: number;
-}
+};
 
 function parseFrame(frame: string | undefined) {
   const raw = JSON.parse(frame ?? '{}') as {
@@ -75,7 +95,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000 }),
+        React.createElement(StopwatchHarness, {interval: 1000}),
       );
     });
 
@@ -93,7 +113,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000, onLap }),
+        React.createElement(StopwatchHarness, {interval: 1000, onLap}),
       );
     });
 
@@ -124,7 +144,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000 }),
+        React.createElement(StopwatchHarness, {interval: 1000}),
       );
     });
 
@@ -171,7 +191,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000 }),
+        React.createElement(StopwatchHarness, {interval: 1000}),
       );
     });
 
@@ -234,7 +254,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+        React.createElement(StopwatchHarness, {interval: 1000, onTick}),
       );
     });
 
@@ -250,12 +270,12 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+        React.createElement(StopwatchHarness, {interval: 1000, onTick}),
       );
     });
 
     await advanceTimers(3000);
-    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000]);
+    expect(onTick.mock.calls.map(c => c[0])).toEqual([1000, 2000, 3000]);
 
     instance!.unmount();
   });
@@ -265,7 +285,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000, onTick }),
+        React.createElement(StopwatchHarness, {interval: 1000, onTick}),
       );
     });
 
@@ -274,7 +294,7 @@ describe('useStopwatch', () => {
     await advanceTimers(300);
     await act(() => {
       instance!.rerender(
-        React.createElement(StopwatchHarness, { interval: 1000, onTick, action: 'stop' }),
+        React.createElement(StopwatchHarness, {interval: 1000, onTick, action: 'stop'}),
       );
     });
     await advanceTimers(100);
@@ -285,7 +305,7 @@ describe('useStopwatch', () => {
     // would fire at resume+1000; the boundary scheduler fires at 700ms.
     await act(() => {
       instance!.rerender(
-        React.createElement(StopwatchHarness, { interval: 1000, onTick, action: 'start' }),
+        React.createElement(StopwatchHarness, {interval: 1000, onTick, action: 'start'}),
       );
     });
 
@@ -303,7 +323,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000 }),
+        React.createElement(StopwatchHarness, {interval: 1000}),
       );
     });
 
@@ -332,7 +352,7 @@ describe('useStopwatch', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(StopwatchHarness, { interval: 1000 }),
+        React.createElement(StopwatchHarness, {interval: 1000}),
       );
     });
 
@@ -343,7 +363,7 @@ describe('useStopwatch', () => {
 
     await act(() => {
       instance!.rerender(
-        React.createElement(StopwatchHarness, { interval: 1000, action: 'stop' }),
+        React.createElement(StopwatchHarness, {interval: 1000, action: 'stop'}),
       );
     });
 
