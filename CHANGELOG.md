@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/costajohnt/ink-timer/compare/v0.2.4...v1.0.0) (2026-10-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js 22 or later.
+
+### Features
+
+* require Node.js 22 ([#18](https://github.com/costajohnt/ink-timer/issues/18)) ([74f7f46](https://github.com/costajohnt/ink-timer/commit/74f7f4642a186158473101d815040c2c8c090d4d))
+
 ## [0.2.4](https://github.com/costajohnt/ink-timer/compare/v0.2.3...v0.2.4) (2026-10-10)
 
 
