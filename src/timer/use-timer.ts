@@ -1,7 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useInterval, useClampedInterval } from '../use-interval.js';
-import { formatTime, type WarnOnce } from '../format.js';
-import type { UseTimerOptions, UseTimerResult } from '../types.js';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
+import {useInterval, useClampedInterval} from '../use-interval.js';
+import {formatTime, type WarnOnce} from '../format.js';
+import type {UseTimerOptions, UseTimerResult} from '../types.js';
 
 export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   const {
@@ -19,7 +24,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   const startedAtRef = useRef<number | null>(autoStart ? Date.now() : null);
   const accumulatedMsRef = useRef(0);
   const isRunningRef = useRef(autoStart);
-  const formatWarnRef = useRef<WarnOnce>({ warned: false });
+  const formatWarnRef = useRef<WarnOnce>({warned: false});
 
   const onTickRef = useRef(onTick);
   useEffect(() => {
@@ -27,7 +32,9 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   });
 
   const tick = useCallback(() => {
-    if (startedAtRef.current === null) return;
+    if (startedAtRef.current === null) {
+      return;
+    }
 
     const now = Date.now();
     const total = accumulatedMsRef.current + (now - startedAtRef.current);
@@ -38,7 +45,10 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   // Schedule each tick to the next interval boundary so displayed values stay
   // aligned to the elapsed-time anchor (no drift, no skipped/repeated seconds).
   const nextDelay = useCallback((): number | null => {
-    if (startedAtRef.current === null) return null;
+    if (startedAtRef.current === null) {
+      return null;
+    }
+
     const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     const nextBoundary =
       Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
@@ -48,14 +58,20 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
   useInterval(tick, isRunning ? nextDelay : null);
 
   const start = useCallback(() => {
-    if (isRunningRef.current) return;
+    if (isRunningRef.current) {
+      return;
+    }
+
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
   }, []);
 
   const stop = useCallback(() => {
-    if (!isRunningRef.current) return;
+    if (!isRunningRef.current) {
+      return;
+    }
+
     if (startedAtRef.current !== null) {
       accumulatedMsRef.current += Date.now() - startedAtRef.current;
       startedAtRef.current = null;
@@ -63,6 +79,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerResult {
       // exact instead of up to one interval behind.
       setElapsedMs(accumulatedMsRef.current);
     }
+
     isRunningRef.current = false;
     setIsRunning(false);
   }, []);

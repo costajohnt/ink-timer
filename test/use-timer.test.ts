@@ -1,11 +1,17 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Text } from 'ink';
-import { useTimer } from '../src/timer/use-timer.js';
-import type { UseTimerOptions } from '../src/types.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Text} from 'ink';
+import {useTimer} from '../src/timer/use-timer.js';
+import type {UseTimerOptions} from '../src/types.js';
+import {advanceTimers} from './helpers.js';
 
 function TimerHarness(props: UseTimerOptions) {
   const timer = useTimer(props);
@@ -23,14 +29,25 @@ function TimerHarness(props: UseTimerOptions) {
 function TimerWithControls({
   action,
   ...options
-}: UseTimerOptions & { action?: 'start' | 'stop' | 'reset' | 'toggle' }) {
+}: UseTimerOptions & {action?: 'start' | 'stop' | 'reset' | 'toggle'}) {
   const timer = useTimer(options);
 
   React.useEffect(() => {
-    if (action === 'start') timer.start();
-    if (action === 'stop') timer.stop();
-    if (action === 'reset') timer.reset();
-    if (action === 'toggle') timer.toggle();
+    if (action === 'start') {
+      timer.start();
+    }
+
+    if (action === 'stop') {
+      timer.stop();
+    }
+
+    if (action === 'reset') {
+      timer.reset();
+    }
+
+    if (action === 'toggle') {
+      timer.toggle();
+    }
   }, [action]);
 
   return React.createElement(
@@ -77,7 +94,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { autoStart: false }),
+        React.createElement(TimerHarness, {autoStart: false}),
       );
     });
     const state = parseFrame(instance!.lastFrame());
@@ -94,7 +111,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000 }),
+        React.createElement(TimerHarness, {interval: 1000}),
       );
     });
 
@@ -110,7 +127,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000 }),
+        React.createElement(TimerHarness, {interval: 1000}),
       );
     });
 
@@ -125,7 +142,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, format: 'human' }),
+        React.createElement(TimerHarness, {interval: 1000, format: 'human'}),
       );
     });
 
@@ -141,7 +158,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, onTick }),
+        React.createElement(TimerHarness, {interval: 1000, onTick}),
       );
     });
 
@@ -156,7 +173,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerWithControls, { interval: 1000 }),
+        React.createElement(TimerWithControls, {interval: 1000}),
       );
     });
 
@@ -167,7 +184,7 @@ describe('useTimer', () => {
     // Stop
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, action: 'stop' }),
+        React.createElement(TimerWithControls, {interval: 1000, action: 'stop'}),
       );
     });
     await advanceTimers(100);
@@ -181,7 +198,7 @@ describe('useTimer', () => {
     // Resume
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, action: 'start' }),
+        React.createElement(TimerWithControls, {interval: 1000, action: 'start'}),
       );
     });
     await advanceTimers(100);
@@ -198,7 +215,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerWithControls, { interval: 1000 }),
+        React.createElement(TimerWithControls, {interval: 1000}),
       );
     });
 
@@ -209,7 +226,7 @@ describe('useTimer', () => {
     // Reset
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, action: 'reset' }),
+        React.createElement(TimerWithControls, {interval: 1000, action: 'reset'}),
       );
     });
     await advanceTimers(100);
@@ -227,14 +244,14 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, onTick }),
+        React.createElement(TimerHarness, {interval: 1000, onTick}),
       );
     });
 
     // Ticks land on exact elapsed boundaries: 1000, 2000, 3000 — no drift,
     // no repeated or skipped values.
     await advanceTimers(3000);
-    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000]);
+    expect(onTick.mock.calls.map(c => c[0])).toEqual([1000, 2000, 3000]);
 
     instance!.unmount();
   });
@@ -244,7 +261,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, onTick }),
+        React.createElement(TimerHarness, {interval: 1000, onTick}),
       );
     });
 
@@ -254,7 +271,7 @@ describe('useTimer', () => {
     // Switch to a 500ms interval; next boundaries are 2500, 3000, ...
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerHarness, { interval: 500, onTick }),
+        React.createElement(TimerHarness, {interval: 500, onTick}),
       );
     });
 
@@ -270,7 +287,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerWithControls, { interval: 1000, onTick }),
+        React.createElement(TimerWithControls, {interval: 1000, onTick}),
       );
     });
 
@@ -279,7 +296,7 @@ describe('useTimer', () => {
     await advanceTimers(300);
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, onTick, action: 'stop' }),
+        React.createElement(TimerWithControls, {interval: 1000, onTick, action: 'stop'}),
       );
     });
     await advanceTimers(100);
@@ -290,7 +307,7 @@ describe('useTimer', () => {
     // setInterval would fire at resume+1000; the boundary scheduler fires at 700ms.
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, onTick, action: 'start' }),
+        React.createElement(TimerWithControls, {interval: 1000, onTick, action: 'start'}),
       );
     });
 
@@ -312,13 +329,13 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, onTick }),
+        React.createElement(TimerHarness, {interval: 1000, onTick}),
       );
     });
 
     await advanceTimers(5000);
     expect(onTick).toHaveBeenCalledTimes(5);
-    expect(onTick.mock.calls.map((c) => c[0])).toEqual([1000, 2000, 3000, 4000, 5000]);
+    expect(onTick.mock.calls.map(c => c[0])).toEqual([1000, 2000, 3000, 4000, 5000]);
 
     instance!.unmount();
   });
@@ -328,7 +345,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerHarness, { interval: 1000, onTick }),
+        React.createElement(TimerHarness, {interval: 1000, onTick}),
       );
     });
 
@@ -345,7 +362,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerWithControls, { interval: 1000 }),
+        React.createElement(TimerWithControls, {interval: 1000}),
       );
     });
 
@@ -357,7 +374,7 @@ describe('useTimer', () => {
     // Toggle off
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, action: 'toggle' }),
+        React.createElement(TimerWithControls, {interval: 1000, action: 'toggle'}),
       );
     });
     await advanceTimers(100);
@@ -372,7 +389,7 @@ describe('useTimer', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(TimerWithControls, { interval: 1000 }),
+        React.createElement(TimerWithControls, {interval: 1000}),
       );
     });
 
@@ -383,7 +400,7 @@ describe('useTimer', () => {
 
     await act(() => {
       instance!.rerender(
-        React.createElement(TimerWithControls, { interval: 1000, action: 'stop' }),
+        React.createElement(TimerWithControls, {interval: 1000, action: 'stop'}),
       );
     });
 

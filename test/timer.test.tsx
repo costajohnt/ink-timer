@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Timer } from '../src/timer/timer.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Timer} from '../src/timer/timer.js';
+import {advanceTimers} from './helpers.js';
 
 describe('Timer component', () => {
   beforeEach(() => {
@@ -40,7 +46,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { prefix: 'Elapsed: ', suffix: ' elapsed' }),
+        React.createElement(Timer, {prefix: 'Elapsed: ', suffix: ' elapsed'}),
       );
     });
 
@@ -54,7 +60,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { format: 'human' }),
+        React.createElement(Timer, {format: 'human'}),
       );
     });
 
@@ -68,7 +74,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { showMilliseconds: true }),
+        React.createElement(Timer, {showMilliseconds: true}),
       );
     });
 
@@ -84,7 +90,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { autoStart: false }),
+        React.createElement(Timer, {autoStart: false}),
       );
     });
 
@@ -98,7 +104,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { enableKeyboard: true }),
+        React.createElement(Timer, {enableKeyboard: true}),
       );
     });
 
@@ -131,7 +137,7 @@ describe('Timer component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Timer, { enableKeyboard: true }),
+        React.createElement(Timer, {enableKeyboard: true}),
       );
     });
 

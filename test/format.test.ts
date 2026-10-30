@@ -1,5 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
-import { formatTime, resolveComponentFormat, buildAriaTimeDescription } from '../src/format.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+} from 'vitest';
+import {formatTime, resolveComponentFormat, buildAriaTimeDescription} from '../src/format.js';
 
 describe('formatTime', () => {
   describe('digital preset (default)', () => {
@@ -52,7 +57,7 @@ describe('formatTime', () => {
     });
 
     it('pads milliseconds to 3 digits', () => {
-      expect(formatTime(1_005, 'digital-ms').text).toBe('00:01.005');
+      expect(formatTime(1005, 'digital-ms').text).toBe('00:01.005');
     });
   });
 
@@ -134,7 +139,9 @@ describe('formatTime', () => {
 describe('custom format error handling', () => {
   it('falls back to digital when custom format throws', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const broken = () => { throw new Error('boom'); };
+    const broken = () => {
+      throw new Error('boom');};
+
     const result = formatTime(5000, broken);
     expect(result.text).toBe('00:05');
     expect(warnSpy).toHaveBeenCalledWith(
@@ -146,8 +153,10 @@ describe('custom format error handling', () => {
 
   it('warns only once per warn context for repeated errors', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const broken = () => { throw new Error('boom'); };
-    const warnOnce = { warned: false };
+    const broken = () => {
+      throw new Error('boom');};
+
+    const warnOnce = {warned: false};
     formatTime(1000, broken, warnOnce);
     formatTime(2000, broken, warnOnce);
     formatTime(3000, broken, warnOnce);
@@ -157,9 +166,11 @@ describe('custom format error handling', () => {
 
   it('uses independent warn contexts per caller', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const broken = () => { throw new Error('boom'); };
-    const a = { warned: false };
-    const b = { warned: false };
+    const broken = () => {
+      throw new Error('boom');};
+
+    const a = {warned: false};
+    const b = {warned: false};
     formatTime(1000, broken, a);
     formatTime(1000, broken, a);
     formatTime(1000, broken, b);

@@ -1,6 +1,11 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useInterval, useClampedInterval } from '../use-interval.js';
-import { formatTime, type WarnOnce } from '../format.js';
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from 'react';
+import {useInterval, useClampedInterval} from '../use-interval.js';
+import {formatTime, type WarnOnce} from '../format.js';
 import type {
   Lap,
   UseStopwatchOptions,
@@ -31,13 +36,18 @@ export function useStopwatch(
   const lapCountRef = useRef(0);
   const onTickRef = useRef(onTick);
   const onLapRef = useRef(onLap);
-  const formatWarnRef = useRef<WarnOnce>({ warned: false });
+  const formatWarnRef = useRef<WarnOnce>({warned: false});
 
-  useEffect(() => { onTickRef.current = onTick; });
-  useEffect(() => { onLapRef.current = onLap; });
+  useEffect(() => {
+    onTickRef.current = onTick;});
+  useEffect(() => {
+    onLapRef.current = onLap;});
 
   const tick = useCallback(() => {
-    if (startedAtRef.current === null) return;
+    if (startedAtRef.current === null) {
+      return;
+    }
+
     const total = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     setElapsedMs(total);
     onTickRef.current?.(total);
@@ -46,7 +56,10 @@ export function useStopwatch(
   // Schedule each tick to the next interval boundary so displayed values stay
   // aligned to the elapsed-time anchor (no drift, no skipped/repeated seconds).
   const nextDelay = useCallback((): number | null => {
-    if (startedAtRef.current === null) return null;
+    if (startedAtRef.current === null) {
+      return null;
+    }
+
     const elapsed = accumulatedMsRef.current + (Date.now() - startedAtRef.current);
     const nextBoundary =
       Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
@@ -56,14 +69,20 @@ export function useStopwatch(
   useInterval(tick, isRunning ? nextDelay : null);
 
   const start = useCallback(() => {
-    if (isRunningRef.current) return;
+    if (isRunningRef.current) {
+      return;
+    }
+
     startedAtRef.current = Date.now();
     isRunningRef.current = true;
     setIsRunning(true);
   }, []);
 
   const stop = useCallback(() => {
-    if (!isRunningRef.current) return;
+    if (!isRunningRef.current) {
+      return;
+    }
+
     if (startedAtRef.current !== null) {
       accumulatedMsRef.current += Date.now() - startedAtRef.current;
       startedAtRef.current = null;
@@ -71,6 +90,7 @@ export function useStopwatch(
       // exact instead of up to one interval behind.
       setElapsedMs(accumulatedMsRef.current);
     }
+
     isRunningRef.current = false;
     setIsRunning(false);
   }, []);
@@ -95,7 +115,9 @@ export function useStopwatch(
   }, [start, stop]);
 
   const lap = useCallback(() => {
-    if (startedAtRef.current === null) return;
+    if (startedAtRef.current === null) {
+      return;
+    }
 
     const now = Date.now();
     const cumulativeMs =
@@ -112,7 +134,7 @@ export function useStopwatch(
     };
 
     onLapRef.current?.(newLap);
-    setLaps((prev) => [...prev, newLap]);
+    setLaps(previous => [...previous, newLap]);
   }, [format]);
 
   const formatted = formatTime(elapsedMs, format, formatWarnRef.current);

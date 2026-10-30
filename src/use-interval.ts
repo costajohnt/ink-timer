@@ -1,18 +1,18 @@
-import { useEffect, useRef } from 'react';
+import {useEffect, useRef} from 'react';
 
 const MIN_INTERVAL_MS = 16;
 
 /**
- * A self-scheduling interval hook that:
- * 1. Uses a ref for the callback to avoid stale closures.
- * 2. Accepts `null` delay to pause.
- * 3. Cleans up on unmount or when the delay source changes.
- * 4. Supports a dynamic delay function so each tick can be scheduled to the
- *    next boundary (or a deadline) instead of a fixed cadence.
- *
- * Instead of `setInterval`, each tick is scheduled with `setTimeout` and the
- * next delay is recomputed after every fire. This keeps ticks aligned to the
- * caller's timestamp anchors (no drift, no skipped/repeated display values).
+ A self-scheduling interval hook that:
+ 1. Uses a ref for the callback to avoid stale closures.
+ 2. Accepts `null` delay to pause.
+ 3. Cleans up on unmount or when the delay source changes.
+ 4. Supports a dynamic delay function so each tick can be scheduled to the
+ next boundary (or a deadline) instead of a fixed cadence.
+ 
+ Instead of `setInterval`, each tick is scheduled with `setTimeout` and the
+ next delay is recomputed after every fire. This keeps ticks aligned to the
+ caller's timestamp anchors (no drift, no skipped/repeated display values).
  *
  * The `delay` argument may be:
  * - `null`  — paused, nothing is scheduled.
@@ -45,20 +45,21 @@ export function useInterval(
       return;
     }
 
-    let stopped = false;
+    let isStopped = false;
     let id: ReturnType<typeof setTimeout> | undefined;
 
     const loop = () => {
-      const { current } = savedDelay;
+      const {current} = savedDelay;
       const value = typeof current === 'function' ? current() : current;
       if (value === null) {
         return;
       }
 
       id = setTimeout(() => {
-        if (stopped) {
+        if (isStopped) {
           return;
         }
+
         savedCallback.current();
         loop();
       }, Math.max(0, value));
@@ -67,7 +68,7 @@ export function useInterval(
     loop();
 
     return () => {
-      stopped = true;
+      isStopped = true;
       if (id !== undefined) {
         clearTimeout(id);
       }
@@ -78,9 +79,9 @@ export function useInterval(
 }
 
 /**
- * Validate and clamp an update interval, warning once per hook instance in
- * dev mode when the interval is non-positive. The warning flag lives in a ref
- * so two hook instances never share (or swallow) each other's warnings.
+ Validate and clamp an update interval, warning once per hook instance in
+ dev mode when the interval is non-positive. The warning flag lives in a ref
+ so two hook instances never share (or swallow) each other's warnings.
  */
 export function useClampedInterval(interval: number): number {
   const warned = useRef(false);
@@ -95,6 +96,7 @@ export function useClampedInterval(interval: number): number {
         `Clamping to ${MIN_INTERVAL_MS}ms minimum.`,
       );
     }
+
     return MIN_INTERVAL_MS;
   }
 

@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Stopwatch } from '../src/stopwatch/stopwatch.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Stopwatch} from '../src/stopwatch/stopwatch.js';
+import {advanceTimers} from './helpers.js';
 
 describe('Stopwatch component', () => {
   beforeEach(() => {
@@ -57,7 +63,7 @@ describe('Stopwatch component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Stopwatch, { enableKeyboard: true }),
+        React.createElement(Stopwatch, {enableKeyboard: true}),
       );
     });
 
@@ -79,7 +85,7 @@ describe('Stopwatch component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Stopwatch, { enableKeyboard: true }),
+        React.createElement(Stopwatch, {enableKeyboard: true}),
       );
     });
 
@@ -111,7 +117,7 @@ describe('Stopwatch component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Stopwatch, { enableKeyboard: true }),
+        React.createElement(Stopwatch, {enableKeyboard: true}),
       );
     });
 

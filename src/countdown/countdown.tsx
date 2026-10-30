@@ -1,8 +1,13 @@
 import React from 'react';
-import { Box, Text, useInput, useIsScreenReaderEnabled } from 'ink';
-import { useCountdown } from './use-countdown.js';
-import { resolveComponentFormat, buildAriaTimeDescription } from '../format.js';
-import type { CountdownProps } from '../types.js';
+import {
+  Box,
+  Text,
+  useInput,
+  useIsScreenReaderEnabled,
+} from 'ink';
+import {resolveComponentFormat, buildAriaTimeDescription} from '../format.js';
+import type {CountdownProps} from '../types.js';
+import {useCountdown} from './use-countdown.js';
 
 export function Countdown({
   duration,
@@ -20,7 +25,7 @@ export function Countdown({
   onTick,
 }: CountdownProps): React.ReactElement {
   const resolvedFormat = resolveComponentFormat(format, showMilliseconds);
-  const { formatted, isRunning, isComplete, start, stop, reset } = useCountdown({
+  const {formatted, isRunning, isComplete, start, stop, reset} = useCountdown({
     duration,
     autoStart,
     interval: interval ?? (showMilliseconds ? 100 : 1000),
@@ -30,18 +35,21 @@ export function Countdown({
   });
 
   useInput(
-    (input) => {
+    input => {
       if (input === ' ') {
-        if (isComplete) return;
+        if (isComplete) {
+          return;
+        }
+
         isRunning ? stop() : start();
       } else if (input === 'r' || input === 'R') {
         reset();
       }
     },
-    { isActive: enableKeyboard },
+    {isActive: enableKeyboard},
   );
 
-  const screenReader = useIsScreenReaderEnabled();
+  const isScreenReader = useIsScreenReaderEnabled();
   const timeDescription = buildAriaTimeDescription(formatted.totalMs, 'ceil');
   let ariaLabel: string;
   if (isComplete) {
@@ -51,22 +59,22 @@ export function Countdown({
     ariaLabel = `Countdown: ${timeDescription} remaining${stateLabel}`;
   }
 
-  const dimColor = dimWhenPaused && !isRunning && !isComplete;
+  const isDimColor = dimWhenPaused && !isRunning && !isComplete;
 
   return (
     <Box aria-role="timer">
       {prefix !== undefined && (
-        <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
+        <Text dimColor={isDimColor} aria-hidden>{prefix}</Text>
       )}
-      <Text color={color} bold={bold} dimColor={dimColor} aria-label={ariaLabel}>
+      <Text color={color} bold={bold} dimColor={isDimColor} aria-label={ariaLabel}>
         {formatted.text}
       </Text>
       {suffix !== undefined && (
-        <Text dimColor={dimColor} aria-hidden>{suffix}</Text>
+        <Text dimColor={isDimColor} aria-hidden>{suffix}</Text>
       )}
-      {screenReader && (
+      {isScreenReader && (
         <Text>
-          {isComplete ? ' (complete)' : isRunning ? ' (running)' : ' (paused)'}
+          {isComplete ? ' (complete)' : (isRunning ? ' (running)' : ' (paused)')}
         </Text>
       )}
     </Box>

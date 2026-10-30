@@ -1,8 +1,13 @@
 import React from 'react';
-import { Box, Text, useInput, useIsScreenReaderEnabled } from 'ink';
-import { useStopwatch } from './use-stopwatch.js';
-import { resolveComponentFormat, buildAriaTimeDescription } from '../format.js';
-import type { StopwatchProps } from '../types.js';
+import {
+  Box,
+  Text,
+  useInput,
+  useIsScreenReaderEnabled,
+} from 'ink';
+import {resolveComponentFormat, buildAriaTimeDescription} from '../format.js';
+import type {StopwatchProps} from '../types.js';
+import {useStopwatch} from './use-stopwatch.js';
 
 export function Stopwatch({
   prefix,
@@ -22,7 +27,7 @@ export function Stopwatch({
   enableLapKey = true,
 }: StopwatchProps): React.ReactElement {
   const resolvedFormat = resolveComponentFormat(format, showMilliseconds);
-  const { formatted, isRunning, laps, start, stop, reset, lap } = useStopwatch({
+  const {formatted, isRunning, laps, start, stop, reset, lap} = useStopwatch({
     autoStart,
     interval: interval ?? (showMilliseconds ? 100 : 1000),
     onTick,
@@ -31,7 +36,7 @@ export function Stopwatch({
   });
 
   useInput(
-    (input) => {
+    input => {
       if (input === ' ') {
         isRunning ? stop() : start();
       } else if (input === 'r' || input === 'R') {
@@ -40,42 +45,42 @@ export function Stopwatch({
         lap();
       }
     },
-    { isActive: enableKeyboard },
+    {isActive: enableKeyboard},
   );
 
-  const screenReader = useIsScreenReaderEnabled();
+  const isScreenReader = useIsScreenReaderEnabled();
   const timeDescription = buildAriaTimeDescription(formatted.totalMs);
   const stateLabel = isRunning ? '' : ', paused';
   const ariaLabel = `Stopwatch: ${timeDescription} elapsed${stateLabel}`;
-  const dimColor = dimWhenPaused && !isRunning;
+  const isDimColor = dimWhenPaused && !isRunning;
 
   const displayLaps = showLaps
-    ? maxLapsDisplay > 0
+    ? (maxLapsDisplay > 0
       ? laps.slice(-maxLapsDisplay)
-      : laps
+      : laps)
     : [];
 
   return (
     <Box flexDirection="column">
       <Box aria-role="timer">
         {prefix !== undefined && (
-          <Text dimColor={dimColor} aria-hidden>{prefix}</Text>
+          <Text dimColor={isDimColor} aria-hidden>{prefix}</Text>
         )}
-        <Text color={color} bold={bold} dimColor={dimColor} aria-label={ariaLabel}>
+        <Text color={color} bold={bold} dimColor={isDimColor} aria-label={ariaLabel}>
           {formatted.text}
         </Text>
         {suffix !== undefined && (
-          <Text dimColor={dimColor} aria-hidden>{suffix}</Text>
+          <Text dimColor={isDimColor} aria-hidden>{suffix}</Text>
         )}
-        {screenReader && (
+        {isScreenReader && (
           <Text> ({isRunning ? 'running' : 'paused'})</Text>
         )}
       </Box>
 
       {displayLaps.length > 0 && (
         <Box flexDirection="column" marginTop={1} aria-role="list">
-          <Text aria-label="Lap times">{''}</Text>
-          {displayLaps.map((l) => (
+          <Text aria-label="Lap times" />
+          {displayLaps.map(l => (
             <Box
               key={l.number}
               gap={1}

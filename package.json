@@ -2,27 +2,21 @@
   "name": "ink-timer",
   "version": "0.2.4",
   "description": "Timer, countdown, and stopwatch hooks and components for Ink",
-  "author": "John Costa",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/costajohnt/ink-timer"
-  },
+  "repository": "github:costajohnt/ink-timer",
   "homepage": "https://github.com/costajohnt/ink-timer#readme",
   "bugs": "https://github.com/costajohnt/ink-timer/issues",
+  "author": "John Costa",
   "type": "module",
-  "sideEffects": false,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "engines": {
     "node": ">=20"
   },
@@ -36,15 +30,19 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
-  "peerDependencies": {
-    "ink": ">=6.0.0",
-    "react": ">=19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@types/react": {
-      "optional": true
-    }
-  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "ink",
+    "cli",
+    "timer",
+    "countdown",
+    "stopwatch",
+    "terminal",
+    "react",
+    "tui"
+  ],
   "devDependencies": {
     "@costajohnt/ink-config": "github:costajohnt/ink-config",
     "@types/node": "^25.5.0",
@@ -57,14 +55,13 @@
     "vitest": "^4.1.11",
     "xo": "^5.0.1"
   },
-  "keywords": [
-    "ink",
-    "cli",
-    "timer",
-    "countdown",
-    "stopwatch",
-    "terminal",
-    "react",
-    "tui"
-  ]
+  "peerDependencies": {
+    "ink": ">=6.0.0",
+    "react": ">=19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
 }

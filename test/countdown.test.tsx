@@ -1,9 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import React from 'react';
-import { act } from 'react';
-import { render } from 'ink-testing-library';
-import { Countdown } from '../src/countdown/countdown.js';
-import { advanceTimers } from './helpers.js';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
+import React, {act} from 'react';
+import {render} from 'ink-testing-library';
+import {Countdown} from '../src/countdown/countdown.js';
+import {advanceTimers} from './helpers.js';
 
 describe('Countdown component', () => {
   beforeEach(() => {
@@ -19,7 +25,7 @@ describe('Countdown component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Countdown, { duration: 60_000 }),
+        React.createElement(Countdown, {duration: 60_000}),
       );
     });
     expect(instance!.lastFrame()).toContain('01:00');
@@ -30,7 +36,7 @@ describe('Countdown component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Countdown, { duration: 10_000 }),
+        React.createElement(Countdown, {duration: 10_000}),
       );
     });
 
@@ -45,7 +51,7 @@ describe('Countdown component', () => {
     let instance: ReturnType<typeof render>;
     await act(() => {
       instance = render(
-        React.createElement(Countdown, { duration: 5000, onComplete }),
+        React.createElement(Countdown, {duration: 5000, onComplete}),
       );
     });
 
