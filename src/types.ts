@@ -279,31 +279,38 @@ export type TimerDisplayProps = {
   */
   color?: string;
   /**
-  Render time text in bold. @default false
+  Render time text in bold.
+  @default false
   */
   bold?: boolean;
   /**
-  Dim the time text when paused. @default true
+  Dim the time text when paused.
+  @default true
   */
   dimWhenPaused?: boolean;
   /**
-  Format preset or custom format function. @default "digital"
+  Format preset or custom format function.
+  @default "digital"
   */
   format?: FormatOption;
   /**
-  Shorthand to switch to "digital-ms" format preset. @default false
+  Shorthand to switch to "digital-ms" format preset.
+  @default false
   */
   showMilliseconds?: boolean;
   /**
-  Start automatically on mount. @default true
+  Start automatically on mount.
+  @default true
   */
   autoStart?: boolean;
   /**
-  Update interval in milliseconds. @default 1000
+  Update interval in milliseconds.
+  @default 1000
   */
   interval?: number;
   /**
-  Enable keyboard controls (Space: pause/resume, R: reset). @default false
+  Enable keyboard controls (Space: pause/resume, R: reset).
+  @default false
   */
   enableKeyboard?: boolean;
 };
@@ -340,15 +347,18 @@ export type StopwatchProps = {
   */
   onLap?: (lap: Lap) => void;
   /**
-  Show lap list below the elapsed time. @default true
+  Show lap list below the elapsed time.
+  @default true
   */
   showLaps?: boolean;
   /**
-  Maximum number of laps to display (most recent first). 0 = unlimited. @default 0
+  Maximum number of laps to display (most recent first). 0 = unlimited.
+  @default 0
   */
   maxLapsDisplay?: number;
   /**
-  Enable the L key for recording laps (only when enableKeyboard is true). @default true
+  Enable the L key for recording laps (only when enableKeyboard is true).
+  @default true
   */
   enableLapKey?: boolean;
 } & TimerDisplayProps;

@@ -50,10 +50,7 @@ const presets: Record<FormatPreset, FormatFunction> = {
 
   human(totalMs: number): string {
     const {hours, minutes, seconds} = decompose(totalMs);
-    const parts: string[] = [];
-    if (hours > 0) {
-      parts.push(`${hours}h`);
-    }
+    const parts = hours > 0 ? [`${hours}h`] : [];
 
     if (minutes > 0 || hours > 0) {
       parts.push(`${minutes}m`);
@@ -65,10 +62,7 @@ const presets: Record<FormatPreset, FormatFunction> = {
 
   'human-ms'(totalMs: number): string {
     const {hours, minutes, seconds, milliseconds} = decompose(totalMs);
-    const parts: string[] = [];
-    if (hours > 0) {
-      parts.push(`${hours}h`);
-    }
+    const parts = hours > 0 ? [`${hours}h`] : [];
 
     if (minutes > 0 || hours > 0) {
       parts.push(`${minutes}m`);
@@ -105,8 +99,10 @@ function roundToSecond(totalMs: number, rounding: Rounding): number {
 /**
 Presets whose output has no sub-second component.
 */
+const secondResolutionFormats = new Set<FormatOption | undefined>([undefined, 'digital', 'human']);
+
 function isSecondResolutionPreset(format: FormatOption | undefined): boolean {
-  return format === undefined || format === 'digital' || format === 'human';
+  return secondResolutionFormats.has(format);
 }
 
 /**
@@ -129,7 +125,7 @@ export type WarnOnce = {
  With `rounding: 'ceil'` the second-resolution presets ('digital', 'human')
  round up to the next whole second, and the hours/minutes/seconds fields
  match the displayed text. Millisecond presets are exact either way, and
- * custom format functions always receive the raw value.
+ custom format functions always receive the raw value.
  */
 export function formatTime(
   totalMs: number,
@@ -184,10 +180,7 @@ export function buildAriaTimeDescription(
   rounding: Rounding = 'floor',
 ): string {
   const {hours, minutes, seconds} = decompose(roundToSecond(totalMs, rounding));
-  const parts: string[] = [];
-  if (hours > 0) {
-    parts.push(`${hours} ${hours === 1 ? 'hour' : 'hours'}`);
-  }
+  const parts = hours > 0 ? [`${hours} ${hours === 1 ? 'hour' : 'hours'}`] : [];
 
   if (minutes > 0) {
     parts.push(`${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`);

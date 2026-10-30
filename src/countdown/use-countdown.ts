@@ -49,9 +49,11 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
   const completeFiredRef = useRef(safeDuration <= 0);
   const durationRef = useRef(safeDuration);
 
-  useEffect(() => {onTickRef.current = onTick;
+  useEffect(() => {
+    onTickRef.current = onTick;
   });
-  useEffect(() => {onCompleteRef.current = onComplete;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
   });
 
   // Handle dynamic duration changes: reset the countdown with the new
@@ -123,7 +125,7 @@ export function useCountdown(options: UseCountdownOptions): UseCountdownResult {
     }
 
     const nextBoundary =
-      Math.floor(elapsed / safeInterval) * safeInterval + safeInterval;
+      (Math.floor(elapsed / safeInterval) * safeInterval) + safeInterval;
     return Math.min(nextBoundary - elapsed, remaining);
   }, [safeInterval]);
 

@@ -41,7 +41,11 @@ export function Countdown({
           return;
         }
 
-        isRunning ? stop() : start();
+        if (isRunning) {
+          stop();
+        } else {
+          start();
+        }
       } else if (input === 'r' || input === 'R') {
         reset();
       }

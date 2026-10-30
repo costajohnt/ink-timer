@@ -6,52 +6,34 @@ import base from '@costajohnt/ink-config/xo';
 const xoConfig = [
 	...base,
 	{
-		// Rules this codebase does not satisfy yet under the shared config.
-		// Burn these down by fixing the code and deleting the line.
 		rules: {
-			'@eslint-react/naming-convention-ref-name': 'off',
-			'@stylistic/brace-style': 'off',
-			'@stylistic/curly-newline': 'off',
-			'@stylistic/max-statements-per-line': 'off',
-			'@stylistic/no-mixed-operators': 'off',
+			// `null` is public API: a `null` delay means "paused" and the
+			// timestamp anchors are nullable; switching to `undefined` is breaking.
 			'@typescript-eslint/no-restricted-types': 'off',
-			'@typescript-eslint/no-unused-expressions': 'off',
-			'jsdoc/check-indentation': 'off',
-			'jsdoc/escape-inline-tags': 'off',
-			'jsdoc/require-asterisk-prefix': 'off',
-			'jsx-a11y-x/aria-props': 'off',
+			// The hooks are documented as usable with any React renderer;
+			// importing `node:process` would break non-Node bundles.
 			'n/prefer-global/process': 'off',
+			// Start anchors are captured with Date.now() at mount so a timer that
+			// auto-starts counts from first render; deferring to an effect shifts timing.
 			'react-hooks/purity': 'off',
+			// Warn-once flags and the format warn context are refs read during
+			// render so dev warnings fire once per instance, synchronously.
 			'react-hooks/refs': 'off',
-			'unicorn/no-immediate-mutation': 'off',
-			'unicorn/prefer-export-from': 'off',
-			'unicorn/prefer-includes-over-repeated-comparisons': 'off',
-			'unicorn/prefer-simple-condition-first': 'off',
 		},
 	},
 	{
-		files: ['test/**', 'src/**/__tests__/**'],
+		files: ['test/**/*.ts'],
 		rules: {
-			'@typescript-eslint/await-thenable': 'off',
+			// Harness components in `.ts` tests use createElement and keep React's
+			// PascalCase component naming.
 			'@typescript-eslint/naming-convention': 'off',
-			'@typescript-eslint/no-confusing-void-expression': 'off',
-			'@typescript-eslint/no-empty-function': 'off',
-			'node-test/no-import-test-files': 'off',
-			'react-hooks/exhaustive-deps': 'off',
+		},
+	},
+	{
+		files: ['test/setup.ts'],
+		rules: {
+			// React reads `IS_REACT_ACT_ENVIRONMENT` from the global object.
 			'unicorn/no-global-object-property-assignment': 'off',
-			'unicorn/prefer-else-if': 'off',
-		},
-	},
-	{
-		files: ['**/*.md'],
-		rules: {
-			'markdown/fenced-code-language': 'off',
-		},
-	},
-	{
-		files: ['package.json'],
-		rules: {
-			'package-json/valid-fields': 'off',
 		},
 	},
 ];
