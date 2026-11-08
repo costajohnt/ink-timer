@@ -1,6 +1,6 @@
 {
   "name": "ink-timer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Timer, countdown, and stopwatch hooks and components for Ink",
   "license": "MIT",
   "repository": "github:costajohnt/ink-timer",

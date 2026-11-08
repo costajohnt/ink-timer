@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/costajohnt/ink-timer/compare/v1.0.0...v1.0.1) (2026-11-08)
+
+
+### Bug Fixes
+
+* **deps:** require ink &gt;=6.2.0 ([#22](https://github.com/costajohnt/ink-timer/issues/22)) ([29b79fa](https://github.com/costajohnt/ink-timer/commit/29b79fa3b1f5b5e624c5eda760e718ae77f27299))
+
 ## [1.0.0](https://github.com/costajohnt/ink-timer/compare/v0.2.4...v1.0.0) (2026-10-30)
 
 
